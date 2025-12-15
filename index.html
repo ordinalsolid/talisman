@@ -1,679 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stone Glyph Art Creator</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-    
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      overflow: hidden;
-    }
-    
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 30px;
-      text-align: center;
-    }
-    
-    .header h1 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
-    }
-    
-    .header p {
-      opacity: 0.9;
-      font-size: 1.1em;
-    }
-    
-    .main {
-      display: flex;
-      gap: 20px;
-      padding: 20px;
-    }
-    
-    .sidebar {
-      width: 250px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    
-    .control-section {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 12px;
-    }
-    
-    .control-section h3 {
-      margin-bottom: 15px;
-      color: #333;
-      font-size: 1.1em;
-    }
-    
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .btn-secondary {
-      background: #48bb78;
-      color: white;
-    }
-    
-    .btn-secondary:hover {
-      background: #38a169;
-      transform: translateY(-2px);
-    }
-    
-    .btn-danger {
-      background: #f56565;
-      color: white;
-    }
-    
-    .btn-danger:hover {
-      background: #e53e3e;
-    }
-    
-    .slider-group {
-      margin-bottom: 15px;
-    }
-    
-    .slider-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: #555;
-      font-weight: 500;
-    }
-    
-    input[type="range"] {
-      width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      background: #ddd;
-      outline: none;
-    }
-    
-    .assets-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-    
-    .asset-item {
-      aspect-ratio: 1;
-      background: white;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: grab;
-      transition: all 0.2s;
-      font-size: 2em;
-    }
-    
-    .asset-item:hover {
-      border-color: #667eea;
-      transform: scale(1.05);
-    }
-    
-    .asset-item:active {
-      cursor: grabbing;
-    }
-    
-    .canvas-container {
-      flex: 1;
-      background: #f8f9fa;
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    canvas {
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      background: #1a1a1a;
-      cursor: crosshair;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    @media (max-width: 968px) {
-      .main {
-        flex-direction: column;
-      }
-      
-      .sidebar {
-        width: 100%;
-      }
-      
-      .assets-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Stone Glyph Art Creator</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+.header {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+
+.main {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.sidebar {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.control-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.assets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.asset-item {
+  aspect-ratio: 1;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  transition: 0.2s;
+}
+
+.asset-item:hover {
+  border-color: #667eea;
+  transform: scale(1.05);
+}
+
+.asset-item img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.canvas-container {
+  flex: 1;
+  background: #f0f0f0;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+canvas {
+  background: #111;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+}
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>🗿 Stone Glyph Art Creator</h1>
-      <p>Create hyperrealistic 3D stone glyphs with organic carved windows</p>
-    </div>
-    
-    <div class="main">
-      <div class="sidebar">
-        <div class="control-section">
-          <h3>Glyph Controls</h3>
-          <div class="slider-group">
-            <label>Windows: <span id="windowsValue">8</span></label>
-            <input type="range" id="windows" min="6" max="10" value="8">
-          </div>
-          <div class="slider-group">
-            <label>Roughness: <span id="roughnessValue">0.7</span></label>
-            <input type="range" id="roughness" min="0.3" max="1" step="0.1" value="0.7">
-          </div>
-          <div class="slider-group">
-            <label>Light Angle: <span id="lightValue">135</span>°</label>
-            <input type="range" id="light" min="0" max="360" value="135">
-          </div>
-          <button class="btn btn-primary" onclick="generateGlyph()">🔄 Regenerate Glyph</button>
-          <button class="btn btn-danger" onclick="clearAssets()">🗑️ Clear Assets</button>
-        </div>
-        
-        <div class="control-section">
-          <h3>Asset Library</h3>
-          <div class="assets-grid">
-            <div class="asset-item" draggable="true" data-asset="⭐">⭐</div>
-            <div class="asset-item" draggable="true" data-asset="🌙">🌙</div>
-            <div class="asset-item" draggable="true" data-asset="☀️">☀️</div>
-            <div class="asset-item" draggable="true" data-asset="🌸">🌸</div>
-            <div class="asset-item" draggable="true" data-asset="🍃">🍃</div>
-            <div class="asset-item" draggable="true" data-asset="💎">💎</div>
-            <div class="asset-item" draggable="true" data-asset="🦋">🦋</div>
-            <div class="asset-item" draggable="true" data-asset="🌊">🌊</div>
-          </div>
-        </div>
-        
-        <div class="control-section">
-          <h3>Export</h3>
-          <button class="btn btn-secondary" onclick="exportImage()">📥 Download Image</button>
-        </div>
-      </div>
-      
-      <div class="canvas-container">
-        <canvas id="canvas" width="600" height="1000"></canvas>
-      </div>
-    </div>
+<div class="container">
+  <div class="header">
+    <h1>Stone Glyph Art Creator</h1>
+    <p>Carved stone + embedded spectral geometry</p>
   </div>
 
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    let glyphOutline = [];
-    let windows = [];
-    let placedAssets = {};
-    let draggedAsset = null;
-    let perlinNoise = [];
+  <div class="main">
+    <div class="sidebar">
+      <div class="control-section">
+        <button onclick="generateGlyph()">Regenerate Glyph</button>
+        <button onclick="clearAssets()">Clear Assets</button>
+      </div>
 
-    // Initialize Perlin-like noise
-    function initNoise() {
-      perlinNoise = [];
-      for (let i = 0; i < 256; i++) {
-        perlinNoise[i] = Math.random();
-      }
-    }
+      <div class="control-section">
+        <h3>Asset Library</h3>
+        <div class="assets-grid">
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_star.png"><img src="Spec_Geo_Assets/asset_star.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_moon.png"><img src="Spec_Geo_Assets/asset_moon.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_sun.png"><img src="Spec_Geo_Assets/asset_sun.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_flower.png"><img src="Spec_Geo_Assets/asset_flower.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_leaf.png"><img src="Spec_Geo_Assets/asset_leaf.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_gem.png"><img src="Spec_Geo_Assets/asset_gem.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_butterfly.png"><img src="Spec_Geo_Assets/asset_butterfly.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_wave.png"><img src="Spec_Geo_Assets/asset_wave.png"></div>
+        </div>
+      </div>
+    </div>
 
-    function noise(x, y) {
-      const X = Math.floor(x) & 255;
-      const Y = Math.floor(y) & 255;
-      return perlinNoise[(X + perlinNoise[Y]) & 255];
-    }
+    <div class="canvas-container">
+      <canvas id="canvas" width="600" height="1000"></canvas>
+    </div>
+  </div>
+</div>
 
-    // Update slider displays
-    document.getElementById('windows').addEventListener('input', (e) => {
-      document.getElementById('windowsValue').textContent = e.target.value;
-    });
-    
-    document.getElementById('roughness').addEventListener('input', (e) => {
-      document.getElementById('roughnessValue').textContent = e.target.value;
-    });
-    
-    document.getElementById('light').addEventListener('input', (e) => {
-      document.getElementById('lightValue').textContent = e.target.value;
-      draw();
-    });
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-    function generateOrganicShape(centerX, centerY, baseSize, complexity) {
-      const points = [];
-      const numPoints = 20 + Math.floor(Math.random() * 15);
-      
-      for (let i = 0; i < numPoints; i++) {
-        const angle = (i / numPoints) * Math.PI * 2;
-        const noiseVal = noise(
-          Math.cos(angle) * 2 + centerX * 0.01,
-          Math.sin(angle) * 2 + centerY * 0.01
-        );
-        
-        const radius = baseSize * (0.5 + noiseVal * complexity);
-        const wobble = (Math.random() - 0.5) * baseSize * 0.4 * complexity;
-        
-        points.push({
-          x: centerX + Math.cos(angle) * (radius + wobble),
-          y: centerY + Math.sin(angle) * (radius + wobble)
-        });
-      }
-      
-      return points;
-    }
+let glyphOutline = [];
+let windows = [];
+let placedAssets = {};
+let draggedAsset = null;
 
-    function smoothPath(points, smoothing = 0.3) {
-      const smoothed = [];
-      for (let i = 0; i < points.length; i++) {
-        const prev = points[(i - 1 + points.length) % points.length];
-        const curr = points[i];
-        const next = points[(i + 1) % points.length];
-        
-        smoothed.push({
-          x: curr.x * (1 - smoothing) + (prev.x + next.x) * smoothing * 0.5,
-          y: curr.y * (1 - smoothing) + (prev.y + next.y) * smoothing * 0.5
-        });
-      }
-      return smoothed;
-    }
+/* ---------- ASSET CACHE ---------- */
+const assetCache = {};
+function loadAsset(src) {
+  if (assetCache[src]) return assetCache[src];
+  const img = new Image();
+  img.src = src;
+  assetCache[src] = img;
+  return img;
+}
 
-    function isPointInPolygon(x, y, polygon) {
-      let inside = false;
-      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        const xi = polygon[i].x, yi = polygon[i].y;
-        const xj = polygon[j].x, yj = polygon[j].y;
-        
-        const intersect = ((yi > y) !== (yj > y))
-            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
-      }
-      return inside;
-    }
+/* ---------- NOISE ---------- */
+const noiseTable = Array.from({length:256},()=>Math.random());
+const noise = (x,y)=>noiseTable[(Math.floor(x)+noiseTable[Math.floor(y)&255])&255];
 
-    function generateGlyph() {
-      initNoise();
-      const windowCount = parseInt(document.getElementById('windows').value);
-      const roughness = parseFloat(document.getElementById('roughness').value);
-      
-      windows = [];
-      placedAssets = {};
-      
-      const margin = 60;
-      const width = canvas.width - margin * 2;
-      const height = canvas.height - margin * 2;
-      
-      // Generate organic window shapes first
-      const attempts = windowCount * 10;
-      for (let i = 0; i < attempts && windows.length < windowCount; i++) {
-        const x = margin + 120 + Math.random() * (width - 240);
-        const y = margin + 120 + Math.random() * (height - 240);
-        const size = 40 + Math.random() * 60;
-        
-        const shape = generateOrganicShape(x, y, size, roughness);
-        const smoothedShape = smoothPath(smoothPath(shape));
-        
-        // Check if too close to existing windows
-        const tooClose = windows.some(w => {
-          return Math.hypot(w.center.x - x, w.center.y - y) < (w.size + size) * 1.3;
-        });
-        
-        if (!tooClose) {
-          windows.push({
-            id: windows.length,
-            center: { x, y },
-            size: size,
-            shape: smoothedShape,
-            depth: 0.6 + Math.random() * 0.4
-          });
-        }
-      }
-      
-      // Generate outer shape that responds to windows
-      const baseOutline = generateOrganicShape(
-        canvas.width / 2,
-        canvas.height / 2,
-        Math.min(width, height) * 0.45,
-        roughness
-      );
-      
-      // Deform outline based on window positions
-      glyphOutline = baseOutline.map(point => {
-        let totalPush = { x: 0, y: 0 };
-        
-        windows.forEach(window => {
-          const dx = point.x - window.center.x;
-          const dy = point.y - window.center.y;
-          const dist = Math.hypot(dx, dy);
-          
-          if (dist < 200) {
-            const influence = (200 - dist) / 200;
-            const pushAmount = window.size * 0.3 * influence;
-            totalPush.x += (dx / dist) * pushAmount;
-            totalPush.y += (dy / dist) * pushAmount;
-          }
-        });
-        
-        return {
-          x: point.x + totalPush.x,
-          y: point.y + totalPush.y
-        };
-      });
-      
-      glyphOutline = smoothPath(smoothPath(glyphOutline));
-      
-      draw();
-    }
+/* ---------- GEOMETRY ---------- */
+function organicShape(cx,cy,r) {
+  const pts=[];
+  const n=30;
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2;
+    const d=r*(0.6+noise(Math.cos(a)*2,Math.sin(a)*2)*0.6);
+    pts.push({x:cx+Math.cos(a)*d,y:cy+Math.sin(a)*d});
+  }
+  return pts;
+}
 
-    function drawPath(points) {
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
-      ctx.closePath();
-    }
+function drawPath(p){
+  ctx.beginPath();
+  ctx.moveTo(p[0].x,p[0].y);
+  p.forEach(pt=>ctx.lineTo(pt.x,pt.y));
+  ctx.closePath();
+}
 
-    function calculateNormal(x, y, points) {
-      let closestDist = Infinity;
-      let normalAngle = 0;
-      
-      for (let i = 0; i < points.length; i++) {
-        const j = (i + 1) % points.length;
-        const dx = points[j].x - points[i].x;
-        const dy = points[j].y - points[i].y;
-        const dist = Math.hypot(x - points[i].x, y - points[i].y);
-        
-        if (dist < closestDist) {
-          closestDist = dist;
-          normalAngle = Math.atan2(dy, dx) + Math.PI / 2;
-        }
-      }
-      
-      return normalAngle;
-    }
+function pointInPoly(x,y,p){
+  let c=false;
+  for(let i=0,j=p.length-1;i<p.length;j=i++)
+    ((p[i].y>y)!==(p[j].y>y)) &&
+    (x<(p[j].x-p[i].x)*(y-p[i].y)/(p[j].y-p[i].y)+p[i].x) &&
+    (c=!c);
+  return c;
+}
 
-    function draw() {
-      const lightAngle = (parseInt(document.getElementById('light').value) * Math.PI) / 180;
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Dark background with gradient
-      const bgGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width);
-      bgGrad.addColorStop(0, '#2a2a2a');
-      bgGrad.addColorStop(1, '#0a0a0a');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      if (glyphOutline.length === 0) return;
-      
-      // Create main stone shape with advanced lighting
-      drawPath(glyphOutline);
+/* ---------- GENERATE ---------- */
+function generateGlyph(){
+  glyphOutline = organicShape(canvas.width/2,canvas.height/2,380);
+  windows=[];
+  placedAssets={};
+
+  for(let i=0;i<8;i++){
+    const x=120+Math.random()*(canvas.width-240);
+    const y=120+Math.random()*(canvas.height-240);
+    const s=45+Math.random()*35;
+    windows.push({id:i,center:{x,y},size:s,shape:organicShape(x,y,s)});
+  }
+  draw();
+}
+
+/* ---------- DRAW ---------- */
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // background
+  const bg=ctx.createRadialGradient(300,500,0,300,500,700);
+  bg.addColorStop(0,"#222");
+  bg.addColorStop(1,"#000");
+  ctx.fillStyle=bg;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // stone
+  drawPath(glyphOutline);
+  ctx.save();
+  ctx.clip();
+  ctx.fillStyle="#666";
+  ctx.fill();
+  ctx.restore();
+
+  // windows
+  windows.forEach(w=>{
+    drawPath(w.shape);
+    ctx.fillStyle="#050505";
+    ctx.fill();
+
+    if(placedAssets[w.id]){
+      const img=loadAsset(placedAssets[w.id]);
+      const s=w.size*1.6;
+
       ctx.save();
-      ctx.clip();
-      
-      // Base stone color with gradient
-      const stoneGrad = ctx.createLinearGradient(
-        canvas.width/2 - 300,
-        canvas.height/2 - 300,
-        canvas.width/2 + 300,
-        canvas.height/2 + 300
-      );
-      stoneGrad.addColorStop(0, '#8b8b8b');
-      stoneGrad.addColorStop(0.5, '#6b6b6b');
-      stoneGrad.addColorStop(1, '#505050');
-      ctx.fillStyle = stoneGrad;
-      ctx.fill();
-      
-      // Hyperrealistic lighting and normal mapping
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      
-      for (let y = 0; y < canvas.height; y += 2) {
-        for (let x = 0; x < canvas.width; x += 2) {
-          if (isPointInPolygon(x, y, glyphOutline)) {
-            // Calculate surface normal using noise
-            const normalX = (noise(x * 0.05, y * 0.05) - 0.5) * 2;
-            const normalY = (noise(x * 0.05 + 100, y * 0.05 + 100) - 0.5) * 2;
-            const normalAngle = Math.atan2(normalY, normalX);
-            
-            // Calculate lighting
-            const lightDot = Math.cos(normalAngle - lightAngle) * 0.5 + 0.5;
-            const specular = Math.pow(Math.max(0, Math.cos(normalAngle - lightAngle)), 32);
-            
-            // Ambient occlusion approximation
-            let ao = 1.0;
-            windows.forEach(window => {
-              const dist = Math.hypot(x - window.center.x, y - window.center.y);
-              if (dist < window.size * 2.5) {
-                ao *= 0.6 + (dist / (window.size * 2.5)) * 0.4;
-              }
-            });
-            
-            const baseColor = 100;
-            const litColor = baseColor * (0.3 + lightDot * 0.6 + specular * 0.3) * ao;
-            
-            // Micro-detail noise
-            const detail = noise(x * 0.2, y * 0.2) * 20 - 10;
-            const finalColor = Math.max(0, Math.min(255, litColor + detail));
-            
-            const idx = (y * canvas.width + x) * 4;
-            data[idx] = finalColor;
-            data[idx + 1] = finalColor;
-            data[idx + 2] = finalColor;
-          }
-        }
-      }
-      
-      ctx.putImageData(imageData, 0, 0);
-      
-      // Edge highlights
-      ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + Math.abs(Math.cos(lightAngle)) * 0.2})`;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      
-      // Add edge shadows on opposite side
-      ctx.strokeStyle = `rgba(0, 0, 0, ${0.3 + Math.abs(Math.sin(lightAngle)) * 0.2})`;
-      ctx.lineWidth = 5;
-      ctx.stroke();
-      
+      ctx.translate(w.center.x,w.center.y);
+
+      // depth shadow
+      ctx.globalCompositeOperation="multiply";
+      ctx.shadowColor="rgba(0,0,0,0.9)";
+      ctx.shadowBlur=25;
+      ctx.shadowOffsetX=6;
+      ctx.shadowOffsetY=8;
+      ctx.drawImage(img,-s/2,-s/2,s,s);
+
+      // highlight overlay
+      ctx.globalCompositeOperation="overlay";
+      ctx.globalAlpha=0.35;
+      ctx.drawImage(img,-s/2,-s/2,s,s);
+
       ctx.restore();
-      
-      // Draw carved windows with extreme depth
-      windows.forEach(window => {
-        // Deep shadow layers
-        for (let d = 8; d >= 0; d--) {
-          ctx.save();
-          
-          const offsetX = Math.cos(lightAngle + Math.PI) * d * 2;
-          const offsetY = Math.sin(lightAngle + Math.PI) * d * 2;
-          
-          ctx.translate(offsetX, offsetY);
-          drawPath(window.shape);
-          
-          const shadowOpacity = (8 - d) / 8 * 0.15;
-          ctx.fillStyle = `rgba(0, 0, 0, ${shadowOpacity})`;
-          ctx.fill();
-          
-          ctx.restore();
-        }
-        
-        // Main window cavity
-        drawPath(window.shape);
-        
-        const cavityGrad = ctx.createRadialGradient(
-          window.center.x,
-          window.center.y,
-          0,
-          window.center.x,
-          window.center.y,
-          window.size * 1.5
-        );
-        cavityGrad.addColorStop(0, '#050505');
-        cavityGrad.addColorStop(0.6, '#0a0a0a');
-        cavityGrad.addColorStop(1, '#151515');
-        ctx.fillStyle = cavityGrad;
-        ctx.fill();
-        
-        // Inner surface detail
-        ctx.save();
-        ctx.clip();
-        for (let i = 0; i < 500; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const dist = Math.random() * window.size;
-          const x = window.center.x + Math.cos(angle) * dist;
-          const y = window.center.y + Math.sin(angle) * dist;
-          
-          const shade = 5 + Math.random() * 15;
-          ctx.fillStyle = `rgba(${shade}, ${shade}, ${shade}, 0.3)`;
-          ctx.fillRect(x, y, 1, 1);
-        }
-        ctx.restore();
-        
-        // Carved edge highlights
-        ctx.strokeStyle = 'rgba(60, 60, 60, 0.5)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        // Rim lighting on cavity edge
-        const rimAngle = lightAngle + Math.PI;
-        ctx.strokeStyle = `rgba(40, 40, 40, ${0.3 + Math.abs(Math.cos(rimAngle)) * 0.3})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        
-        // Draw placed asset
-        if (placedAssets[window.id]) {
-          ctx.save();
-          ctx.translate(window.center.x, window.center.y);
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-          ctx.shadowBlur = 15;
-          ctx.shadowOffsetX = Math.cos(lightAngle + Math.PI) * 5;
-          ctx.shadowOffsetY = Math.sin(lightAngle + Math.PI) * 5;
-          ctx.font = `${window.size * 1.3}px Arial`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(placedAssets[window.id], 0, 0);
-          ctx.restore();
-        }
-      });
+      ctx.globalCompositeOperation="source-over";
+      ctx.globalAlpha=1;
     }
+  });
+}
 
-    function findWindowAtPoint(x, y) {
-      for (let window of windows) {
-        if (isPointInPolygon(x, y, window.shape)) {
-          return window;
-        }
-      }
-      return null;
-    }
+/* ---------- INTERACTION ---------- */
+document.querySelectorAll(".asset-item").forEach(i=>{
+  i.addEventListener("dragstart",e=>draggedAsset=i.dataset.asset);
+});
 
-    // Drag and drop functionality
-    document.querySelectorAll('.asset-item').forEach(item => {
-      item.addEventListener('dragstart', (e) => {
-        draggedAsset = e.target.dataset.asset;
-      });
-    });
+canvas.addEventListener("dragover",e=>e.preventDefault());
 
-    canvas.addEventListener('dragover', (e) => {
-      e.preventDefault();
-    });
+canvas.addEventListener("drop",e=>{
+  e.preventDefault();
+  const r=canvas.getBoundingClientRect();
+  const x=e.clientX-r.left;
+  const y=e.clientY-r.top;
+  const w=windows.find(w=>pointInPoly(x,y,w.shape));
+  if(w) placedAssets[w.id]=draggedAsset;
+  draw();
+});
 
-    canvas.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      const window = findWindowAtPoint(x, y);
-      if (window && draggedAsset) {
-        placedAssets[window.id] = draggedAsset;
-        draw();
-      }
-      
-      draggedAsset = null;
-    });
+function clearAssets(){ placedAssets={}; draw(); }
 
-    // Click to place (mobile friendly)
-    let selectedAsset = null;
-    
-    document.querySelectorAll('.asset-item').forEach(item => {
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.asset-item').forEach(i => 
-          i.style.borderColor = '#e2e8f0'
-        );
-        item.style.borderColor = '#667eea';
-        selectedAsset = item.dataset.asset;
-      });
-    });
-
-    canvas.addEventListener('click', (e) => {
-      if (!selectedAsset) return;
-      
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      const window = findWindowAtPoint(x, y);
-      if (window) {
-        placedAssets[window.id] = selectedAsset;
-        draw();
-      }
-    });
-
-    function clearAssets() {
-      placedAssets = {};
-      draw();
-    }
-
-    function exportImage() {
-      const link = document.createElement('a');
-      link.download = `stone-glyph-art-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    }
-
-    // Initialize
-    generateGlyph();
-  </script>
+generateGlyph();
+</script>
 </body>
 </html>
