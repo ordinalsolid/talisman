@@ -116,18 +116,30 @@ let hovered = null;
 let selectedAsset = null;
 
 const assetPaths = [
-  "Spec_Geo_Assets/speculative_geologies_0001.png",
-  "Spec_Geo_Assets/speculative_geologies_0191.png",
-  "Spec_Geo_Assets/speculative_geologies_0148.png",
-  "Spec_Geo_Assets/speculative_geologies_0104g.png",
-  "Spec_Geo_Assets/speculative_geologies_0104c.png",
-  "Spec_Geo_Assets/speculative_geologies_0097b.png",
-  "Spec_Geo_Assets/speculative_geologies_0096h.png",
-  "Spec_Geo_Assets/asset_eye.png",
-  "Spec_Geo_Assets/asset_shell.png",
-  "Spec_Geo_Assets/asset_spiral.png",
-  "Spec_Geo_Assets/asset_bone.png",
-  "Spec_Geo_Assets/asset_cross.png"
+  "Spec_Geo_Assets/sg_0001.png",
+  "Spec_Geo_Assets/sg_0008b.png",
+  "Spec_Geo_Assets/sg_0023c.png",
+  "Spec_Geo_Assets/sg_0047a.png",
+  "Spec_Geo_Assets/sg_0055d.png",
+  "Spec_Geo_Assets/sg_0056b.png",
+  "Spec_Geo_Assets/sg_0058d.png",
+  "Spec_Geo_Assets/sg_0063a.png",
+  "Spec_Geo_Assets/sg_0067.png",
+  "Spec_Geo_Assets/sg_0070.png",
+  "Spec_Geo_Assets/sg_0072.png",
+  "Spec_Geo_Assets/sg_0078a.png"
+	"Spec_Geo_Assets/sg_0078f.png"
+	"Spec_Geo_Assets/sg_0080b.png"
+	"Spec_Geo_Assets/sg_0080c.png"
+	"Spec_Geo_Assets/sg_0085a.png"
+	"Spec_Geo_Assets/sg_0086a.png"
+	"Spec_Geo_Assets/sg_0096a.png"
+	"Spec_Geo_Assets/sg_0096h.png"
+	"Spec_Geo_Assets/sg_0097b.png"
+	"Spec_Geo_Assets/sg_0104c.png"
+	"Spec_Geo_Assets/sg_0104g.png"
+	"Spec_Geo_Assets/sg_0148.png"
+	"Spec_Geo_Assets/sg_0191.png"
 ];
 
 const imgCache = {};
@@ -156,11 +168,11 @@ assetPaths.forEach(src => {
 /* ---------- GEOMETRY ---------- */
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 
-function organic(cx,cy,r,n=36){
+function organic(cx,cy,r,n=40){
   const pts=[];
   for(let i=0;i<n;i++){
     const a=i/n*Math.PI*2;
-    const e=r*(0.65+Math.random()*0.55);
+    const e=r*(0.6+Math.random()*0.6);
     pts.push({x:cx+Math.cos(a)*e,y:cy+Math.sin(a)*e});
   }
   return pts;
@@ -192,14 +204,14 @@ function generate(){
   let id=0;
 
   while(cavities.length<count){
-    const r=40+Math.random()*40;
+    const r=85+Math.random()*55; // ~2x larger
     const c={
       id:id++,
-      x:canvas.width/2+(Math.random()-0.5)*320,
-      y:canvas.height/2+(Math.random()-0.5)*480,
+      x:canvas.width/2+(Math.random()-0.5)*280,
+      y:canvas.height/2+(Math.random()-0.5)*420,
       r
     };
-    if(cavities.every(o=>dist(c,o)>c.r+o.r+28)){
+    if(cavities.every(o=>dist(c,o)>c.r+o.r+40)){
       c.shape=organic(c.x,c.y,c.r);
       cavities.push(c);
     }
@@ -214,18 +226,18 @@ function buildOutline(){
   const cx=canvas.width/2;
   const cy=canvas.height/2;
 
-  const steps=160;
+  const steps=180;
   for(let i=0;i<steps;i++){
     const a=i/steps*Math.PI*2;
     let d=0;
 
     cavities.forEach(c=>{
       const dx=Math.cos(a)*(c.x-cx)+Math.sin(a)*(c.y-cy);
-      const influence=Math.max(0,c.r*1.8-dx);
+      const influence=Math.max(0,c.r*2.2-dx);
       d+=influence;
     });
 
-    d=180+d*0.45+Math.random()*20;
+    d=210+d*0.5+Math.random()*30;
     outline.push({
       x:cx+Math.cos(a)*d,
       y:cy+Math.sin(a)*d
@@ -233,24 +245,36 @@ function buildOutline(){
   }
 }
 
-/* ---------- TEXTURE ---------- */
+/* ---------- ROCK TEXTURE ---------- */
 function rockFill(){
-  const g=ctx.createLinearGradient(0,0,0,canvas.height);
-  g.addColorStop(0,"#555");
-  g.addColorStop(1,"#111");
-  ctx.fillStyle=g;
+  // Base value gradient (light from above)
+  const base=ctx.createLinearGradient(0,0,0,canvas.height);
+  base.addColorStop(0,"#666");
+  base.addColorStop(1,"#121212");
+  ctx.fillStyle=base;
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  for(let i=0;i<70000;i++){
-    ctx.fillStyle=`rgba(${80+Math.random()*50},${80+Math.random()*50},${80+Math.random()*50},0.05)`;
+  // Sedimentary banding
+  ctx.globalCompositeOperation="multiply";
+  for(let y=0;y<canvas.height;y+=4){
+    ctx.fillStyle=`rgba(0,0,0,${0.04+Math.random()*0.06})`;
+    ctx.fillRect(0,y,canvas.width,2+Math.random()*2);
+  }
+
+  // Fracture noise (mid-frequency)
+  for(let i=0;i<25000;i++){
+    ctx.fillStyle=`rgba(${90+Math.random()*40},${90+Math.random()*40},${90+Math.random()*40},0.08)`;
+    ctx.fillRect(Math.random()*canvas.width,Math.random()*canvas.height,2,2);
+  }
+
+  // Surface grit (high-frequency)
+  ctx.globalCompositeOperation="overlay";
+  for(let i=0;i<60000;i++){
+    const v=60+Math.random()*80;
+    ctx.fillStyle=`rgba(${v},${v},${v},0.06)`;
     ctx.fillRect(Math.random()*canvas.width,Math.random()*canvas.height,1,1);
   }
 
-  ctx.globalCompositeOperation="multiply";
-  for(let y=0;y<canvas.height;y+=6){
-    ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.08})`;
-    ctx.fillRect(0,y,canvas.width,3);
-  }
   ctx.globalCompositeOperation="source-over";
 }
 
@@ -271,14 +295,21 @@ function draw(){
     ctx.fillStyle="#050505";
     ctx.fill();
 
-    const g=ctx.createRadialGradient(c.x,c.y-c.r*0.3,c.r*0.2,c.x,c.y,c.r);
+    const g=ctx.createRadialGradient(
+      c.x,
+      c.y-c.r*0.4,
+      c.r*0.3,
+      c.x,
+      c.y,
+      c.r
+    );
     g.addColorStop(0,"rgba(255,255,255,0.18)");
-    g.addColorStop(1,"rgba(0,0,0,0.75)");
+    g.addColorStop(1,"rgba(0,0,0,0.85)");
     ctx.fillStyle=g;
     ctx.fill();
 
     if(c===hovered){
-      ctx.strokeStyle="rgba(255,255,255,0.4)";
+      ctx.strokeStyle="rgba(255,255,255,0.35)";
       ctx.lineWidth=2;
       ctx.stroke();
     }
@@ -286,12 +317,12 @@ function draw(){
     const p=placedAssets[c.id];
     if(p){
       const img=loadImg(p.src);
-      const size=c.r*2*(1.25-p.depth*0.35);
+      const size=c.r*2*(1.2-p.depth*0.3);
       ctx.save();
       ctx.translate(c.x,c.y);
       ctx.shadowColor="rgba(0,0,0,0.9)";
-      ctx.shadowBlur=30*p.depth;
-      ctx.shadowOffsetY=14*p.depth;
+      ctx.shadowBlur=35*p.depth;
+      ctx.shadowOffsetY=18*p.depth;
       ctx.drawImage(img,-size/2,-size/2,size,size);
       ctx.restore();
     }
@@ -326,6 +357,4 @@ generate();
 </script>
 </body>
 </html>
-
-
 
