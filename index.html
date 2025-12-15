@@ -50,18 +50,6 @@ body {
   border-radius: 12px;
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  background: #667eea;
-  color: white;
-  font-weight: 600;
-}
-
 .assets-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -76,13 +64,13 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: grab;
-  transition: .2s;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.asset-item:hover {
+.asset-item.selected {
   border-color: #667eea;
-  transform: scale(1.05);
+  box-shadow: 0 0 0 2px rgba(102,126,234,.4);
 }
 
 .asset-item img {
@@ -104,6 +92,7 @@ button {
 canvas {
   background: #111;
   border-radius: 12px;
+  cursor: crosshair;
 }
 </style>
 </head>
@@ -112,7 +101,7 @@ canvas {
 <div class="container">
   <div class="header">
     <h1>Stone Glyph Art Creator</h1>
-    <p>Carved stone with embedded spectral geometry</p>
+    <p>Select an asset → hover a cavity → click to place</p>
   </div>
 
   <div class="main">
@@ -124,6 +113,7 @@ canvas {
 
       <div class="control-section">
         <h3>Assets</h3>
+         <h3>Assets</h3>
         <div class="assets-grid">
           <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0001.png"><img src="Spec_Geo_Assets/speculative_geologies_0001.png"></div>
           <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0008b.png"><img src="Spec_Geo_Assets/speculative_geologies_0008b.png"></div>
@@ -150,7 +140,8 @@ const ctx = canvas.getContext("2d");
 let glyphOutline = [];
 let windows = [];
 let placedAssets = {};
-let draggedAsset = null;
+let selectedAsset = null;
+let hoveredWindow = null;
 
 /* ---------- IMAGE CACHE ---------- */
 const assetCache = {};
@@ -163,139 +154,134 @@ function loadAsset(src) {
   return img;
 }
 
-/* ---------- NOISE ---------- */
-const noiseTable = Array.from({length:256},()=>Math.random());
-const noise = (x,y)=>noiseTable[(Math.floor(x)+noiseTable[Math.floor(y)&255])&255];
-
-/* ---------- SHAPES ---------- */
-function organic(cx,cy,r) {
-  const pts=[];
-  const n=28;
-  for(let i=0;i<n;i++){
-    const a=i/n*Math.PI*2;
-    const d=r*(0.65+noise(Math.cos(a)*2,Math.sin(a)*2)*0.6);
-    pts.push({x:cx+Math.cos(a)*d,y:cy+Math.sin(a)*d});
+/* ---------- GEOMETRY ---------- */
+function organic(cx, cy, r) {
+  const pts = [];
+  const n = 28;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const d = r * (0.65 + Math.random() * 0.4);
+    pts.push({ x: cx + Math.cos(a) * d, y: cy + Math.sin(a) * d });
   }
   return pts;
 }
 
-function drawPath(p){
+function drawPath(p) {
   ctx.beginPath();
-  ctx.moveTo(p[0].x,p[0].y);
-  p.forEach(pt=>ctx.lineTo(pt.x,pt.y));
+  ctx.moveTo(p[0].x, p[0].y);
+  p.forEach(pt => ctx.lineTo(pt.x, pt.y));
   ctx.closePath();
 }
 
-function pointInPoly(x,y,p){
-  let c=false;
-  for(let i=0,j=p.length-1;i<p.length;j=i++)
-    ((p[i].y>y)!==(p[j].y>y)) &&
-    (x<(p[j].x-p[i].x)*(y-p[i].y)/(p[j].y-p[i].y)+p[i].x) &&
-    (c=!c);
+function pointInPoly(x, y, p) {
+  let c = false;
+  for (let i = 0, j = p.length - 1; i < p.length; j = i++)
+    ((p[i].y > y) !== (p[j].y > y)) &&
+    (x < (p[j].x - p[i].x) * (y - p[i].y) / (p[j].y - p[i].y) + p[i].x) &&
+    (c = !c);
   return c;
 }
 
 /* ---------- GENERATE ---------- */
-function generateGlyph(){
-  glyphOutline = organic(canvas.width/2,canvas.height/2,380);
-  windows=[];
-  placedAssets={};
+function generateGlyph() {
+  glyphOutline = organic(canvas.width / 2, canvas.height / 2, 380);
+  windows = [];
+  placedAssets = {};
 
-  for(let i=0;i<8;i++){
-    const x=120+Math.random()*(canvas.width-240);
-    const y=140+Math.random()*(canvas.height-280);
-    const size=45+Math.random()*40;
-    windows.push({
-      id:i,
-      center:{x,y},
-      size,
-      shape:organic(x,y,size)
-    });
+  for (let i = 0; i < 8; i++) {
+    const x = 120 + Math.random() * (canvas.width - 240);
+    const y = 140 + Math.random() * (canvas.height - 280);
+    const size = 50 + Math.random() * 35;
+    windows.push({ id: i, center: { x, y }, size, shape: organic(x, y, size) });
   }
   draw();
 }
 
 /* ---------- DRAW ---------- */
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const bg=ctx.createRadialGradient(300,500,0,300,500,800);
-  bg.addColorStop(0,"#222");
-  bg.addColorStop(1,"#000");
-  ctx.fillStyle=bg;
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  const bg = ctx.createRadialGradient(300, 500, 0, 300, 500, 800);
+  bg.addColorStop(0, "#222");
+  bg.addColorStop(1, "#000");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawPath(glyphOutline);
   ctx.save();
   ctx.clip();
-  ctx.fillStyle="#666";
+  ctx.fillStyle = "#666";
   ctx.fill();
   ctx.restore();
 
-  windows.forEach(w=>{
+  windows.forEach(w => {
     drawPath(w.shape);
-    ctx.fillStyle="#050505";
+    ctx.fillStyle = "#050505";
     ctx.fill();
 
-    if(placedAssets[w.id]){
-      const {src, depth} = placedAssets[w.id];
+    if (w === hoveredWindow) {
+      ctx.strokeStyle = "rgba(255,255,255,0.35)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    if (placedAssets[w.id]) {
+      const { src, depth } = placedAssets[w.id];
       const img = loadAsset(src);
-      const baseSize = w.size * 1.6;
-      const seatedSize = baseSize * (1 - depth * 0.25);
+      const size = w.size * (1.6 - depth * 0.4);
 
       ctx.save();
       ctx.translate(w.center.x, w.center.y);
-
-      ctx.globalCompositeOperation = "multiply";
-      ctx.shadowColor = "rgba(0,0,0,0.9)";
+      ctx.shadowColor = "rgba(0,0,0,0.8)";
       ctx.shadowBlur = 30 * depth;
       ctx.shadowOffsetX = 6 * depth;
       ctx.shadowOffsetY = 10 * depth;
-      ctx.drawImage(img,-seatedSize/2,-seatedSize/2,seatedSize,seatedSize);
-
-      ctx.globalCompositeOperation = "overlay";
-      ctx.globalAlpha = 0.35 * (1 - depth);
-      ctx.drawImage(img,-seatedSize/2,-seatedSize/2,seatedSize,seatedSize);
-
+      ctx.drawImage(img, -size / 2, -size / 2, size, size);
       ctx.restore();
-      ctx.globalCompositeOperation="source-over";
-      ctx.globalAlpha=1;
     }
   });
 }
 
-/* ---------- INTERACTION ---------- */
-document.querySelectorAll(".asset-item").forEach(item=>{
-  item.addEventListener("dragstart",e=>{
-    draggedAsset = item.dataset.asset;
-    e.dataTransfer.setData("text/plain", draggedAsset);
+/* ---------- ASSET SELECTION ---------- */
+document.querySelectorAll(".asset-item").forEach(item => {
+  item.addEventListener("click", () => {
+    document.querySelectorAll(".asset-item").forEach(i => i.classList.remove("selected"));
+    item.classList.add("selected");
+    selectedAsset = item.dataset.asset;
   });
 });
 
-canvas.addEventListener("dragover",e=>e.preventDefault());
-
-canvas.addEventListener("drop",e=>{
-  e.preventDefault();
-  if(!draggedAsset) return;
-
-  const r=canvas.getBoundingClientRect();
-  const x=e.clientX-r.left;
-  const y=e.clientY-r.top;
-
-  const w=windows.find(w=>pointInPoly(x,y,w.shape));
-  if(!w) return;
-
-  const dist = Math.hypot(x-w.center.x,y-w.center.y);
-  const depth = Math.min(1, dist / w.size);
-
-  placedAssets[w.id] = { src: draggedAsset, depth };
+/* ---------- CANVAS INTERACTION ---------- */
+canvas.addEventListener("mousemove", e => {
+  const r = canvas.getBoundingClientRect();
+  const x = e.clientX - r.left;
+  const y = e.clientY - r.top;
+  hoveredWindow = windows.find(w => pointInPoly(x, y, w.shape)) || null;
   draw();
 });
 
-function clearAssets(){ placedAssets={}; draw(); }
+canvas.addEventListener("click", e => {
+  if (!selectedAsset || !hoveredWindow) return;
+
+  const r = canvas.getBoundingClientRect();
+  const x = e.clientX - r.left;
+  const y = e.clientY - r.top;
+
+  const d = Math.hypot(x - hoveredWindow.center.x, y - hoveredWindow.center.y);
+  const depth = Math.min(1, d / hoveredWindow.size);
+
+  placedAssets[hoveredWindow.id] = { src: selectedAsset, depth };
+  draw();
+});
+
+function clearAssets() {
+  placedAssets = {};
+  draw();
+}
 
 generateGlyph();
 </script>
 </body>
 </html>
+
 
