@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spec_Geo Glyph Creator</title>
+  <title>Digital Talisman Maker</title>
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #1a1c2c 0%, #4a192c 100%);
-      --panel-bg: rgba(255, 255, 255, 0.95);
-      --accent: #ff4757;
+      /* Changed theme to feel a bit more mystical/earthy */
+      --bg-gradient: linear-gradient(135deg, #2b1a2c 0%, #1a1c2c 100%);
+      --panel-bg: rgba(245, 245, 240, 0.95);
+      --accent: #8e44ad; /* Purple accent */
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body {
-      font-family: 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg-gradient);
       min-height: 100vh;
       padding: 20px;
@@ -26,7 +27,7 @@
       margin: 0 auto;
       background: var(--panel-bg);
       border-radius: 16px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -34,8 +35,8 @@
     }
     
     .header {
-      background: #111;
-      color: white;
+      background: #1a1a1a;
+      color: #e0e0e0;
       padding: 20px 30px;
       display: flex;
       justify-content: space-between;
@@ -43,7 +44,7 @@
       border-bottom: 4px solid var(--accent);
     }
 
-    .header h1 { font-size: 1.5rem; letter-spacing: 1px; text-transform: uppercase; }
+    .header h1 { font-size: 1.5rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 300;}
     
     .main {
       display: flex;
@@ -52,34 +53,53 @@
     }
     
     .sidebar {
-      width: 320px;
-      background: #f0f0f0;
+      width: 340px;
+      background: #e5e5e0;
       padding: 20px;
       overflow-y: auto;
-      border-right: 1px solid #ddd;
+      border-right: 1px solid #ccc;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
     
     .control-group {
-      background: white;
+      background: #fafafa;
       padding: 15px;
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border: 1px solid #ddd;
     }
     
     .control-group h3 {
       font-size: 0.9rem;
       text-transform: uppercase;
-      color: #666;
+      color: #888;
       margin-bottom: 12px;
       border-bottom: 2px solid #eee;
       padding-bottom: 5px;
+      letter-spacing: 1px;
+    }
+
+    /* Text Input Style */
+    .text-input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 1.1rem;
+      color: #333;
+      background: #fff;
+      transition: border-color 0.3s;
+    }
+    .text-input:focus {
+      outline: none;
+      border-color: var(--accent);
     }
     
     .slider-row { margin-bottom: 15px; }
-    .slider-row label { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+    .slider-row label { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #555;}
     input[type="range"] { width: 100%; accent-color: var(--accent); }
     
     .btn {
@@ -88,14 +108,19 @@
       border: none;
       border-radius: 6px;
       font-weight: bold;
+      letter-spacing: 0.5px;
       cursor: pointer;
-      transition: transform 0.1s, opacity 0.2s;
+      transition: transform 0.1s, opacity 0.2s, background-color 0.2s;
       margin-bottom: 8px;
+      text-transform: uppercase;
+      font-size: 0.8rem;
     }
     
     .btn:active { transform: scale(0.98); }
-    .btn-primary { background: #2f3542; color: white; }
+    .btn-primary { background: #333; color: white; }
+    .btn-primary:hover { background: #444; }
     .btn-accent { background: var(--accent); color: white; }
+    .btn-accent:hover { background: #9b59b6; }
     
     .assets-grid {
       display: grid;
@@ -106,13 +131,13 @@
     .asset-item {
       aspect-ratio: 1;
       background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      border: 2px solid #eee;
+      border-radius: 6px;
       cursor: grab;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: border-color 0.2s;
+      transition: all 0.2s;
       padding: 5px;
     }
     
@@ -120,17 +145,23 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      pointer-events: none; /* Let drag event trigger on parent */
+      pointer-events: none; 
+      filter: grayscale(0.2);
+      transition: filter 0.2s;
     }
+    
+    .asset-item:hover img, .asset-item.selected img { filter: grayscale(0); }
     
     .asset-item:hover, .asset-item.selected {
       border-color: var(--accent);
-      background: #fff0f2;
+      background: #f8f0fc;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(142, 68, 173, 0.2);
     }
     
     .canvas-area {
       flex: 1;
-      background: #2a2a2a;
+      background: #111;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -138,62 +169,66 @@
       overflow: hidden;
     }
     
-    /* Checkerboard background for transparency context */
     .canvas-bg {
+      /* Subtle mystic background pattern */
       background-image: 
-        linear-gradient(45deg, #1f1f1f 25%, transparent 25%), 
-        linear-gradient(-45deg, #1f1f1f 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, #1f1f1f 75%), 
-        linear-gradient(-45deg, transparent 75%, #1f1f1f 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        radial-gradient(circle at 50% 50%, #222 0%, #111 80%);
     }
 
     canvas {
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      /* Give the canvas itself a stone-slab feel in the UI */
+      box-shadow: 
+        0 20px 50px rgba(0,0,0,0.8),
+        inset 0 0 0 2px rgba(255,255,255,0.05);
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>Spec_Geo // Lithography Engine</h1>
-      <small style="opacity: 0.7">v2.1 Sculptural Build</small>
+      <h1>Digital Talisman Maker</h1>
+      <small style="opacity: 0.7; letter-spacing: 1px;">v3.0 Lithos</small>
     </div>
     
     <div class="main">
       <div class="sidebar">
         
         <div class="control-group">
-          <h3>Composition</h3>
+          <h3>Talisman Intention</h3>
+          <input type="text" id="intentionInput" class="text-input" placeholder="e.g. PROTECTION, CLARITY" maxlength="20">
+        </div>
+
+        <div class="control-group">
+          <h3>Formation</h3>
           <div class="slider-row">
             <label>Cavity Count <span id="val-windows">5</span></label>
-            <input type="range" id="windows" min="1" max="8" value="5">
+            <input type="range" id="windows" min="1" max="7" value="5">
           </div>
           <div class="slider-row">
-            <label>Erosion (Roughness) <span id="val-roughness">0.6</span></label>
-            <input type="range" id="roughness" min="0.1" max="1.0" step="0.1" value="0.6">
+            <label>Erosion (Roughness) <span id="val-roughness">0.7</span></label>
+            <input type="range" id="roughness" min="0.3" max="1.0" step="0.1" value="0.7">
           </div>
           <div class="slider-row">
             <label>Light Source <span id="val-light">270</span>°</label>
             <input type="range" id="light" min="0" max="360" value="270">
           </div>
-          <button class="btn btn-primary" onclick="generateGlyph()">Generate New Stone</button>
+          <button class="btn btn-primary" onclick="generateTalisman()">Forge New Talisman</button>
         </div>
 
         <div class="control-group">
-          <h3>Asset Library (Spec_Geo_Assets)</h3>
+          <h3>Sigil Library</h3>
           <div class="assets-grid" id="assetGrid"></div>
         </div>
 
         <div class="control-group">
-          <button class="btn btn-accent" onclick="exportImage()">Export .PNG</button>
-          <button class="btn" onclick="clearAssets()" style="background:#ddd">Clear Placed Items</button>
+          <button class="btn btn-accent" onclick="exportImage()">Export Talisman .PNG</button>
+          <button class="btn" onclick="clearAssets()" style="background:#ccc; color:#333">Clear Sigils</button>
         </div>
       </div>
 
       <div class="canvas-area canvas-bg">
-        <canvas id="canvas" width="800" height="1000"></canvas>
+        <canvas id="canvas" width="700" height="1100"></canvas>
       </div>
     </div>
   </div>
@@ -212,42 +247,100 @@
     /* ---------------- ENGINE ---------------- */
     
     const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    // Ensure we use p3 color space for richer stone textures if available
+    const ctx = canvas.getContext('2d', { colorSpace: 'display-p3', willReadFrequently: true });
     
     let state = {
-      glyphOutline: [],
-      cavities: [], // Renamed from windows
-      placedAssets: {}, // Map: cavityID -> ImageObject
-      images: {}, // Preloaded images
-      noiseCache: []
+      talismanOutline: [],
+      cavities: [], 
+      placedAssets: {}, 
+      images: {}, 
+      noiseCache: [],
+      intentionText: ""
     };
 
     let draggedAssetKey = null;
 
     // --- Noise System ---
     function initNoise() {
-      state.noiseCache = new Float32Array(512);
-      for(let i=0; i<512; i++) state.noiseCache[i] = Math.random();
+      state.noiseCache = new Float32Array(1024);
+      for(let i=0; i<1024; i++) state.noiseCache[i] = Math.random();
     }
 
     function noise(x, y) {
-      const X = Math.floor(x) & 255;
-      const Y = Math.floor(y) & 255;
-      // Simple value noise
-      return state.noiseCache[X + state.noiseCache[Y] * 255 & 255]; 
+      const X = Math.floor(Math.abs(x)) & 1023;
+      const Y = Math.floor(Math.abs(y)) & 1023;
+      return state.noiseCache[X + state.noiseCache[Y] * 1023 & 1023]; 
     }
 
     // --- Geometry Helpers ---
-    function generateBlob(cx, cy, radius, roughness, seedOffset) {
+
+    // New function for the main phone-shaped slab
+    function generateTalismanShape(width, height, roughness, seedOffset) {
+        const points = [];
+        const steps = 120; // High resolution for perimeter
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        
+        // Define the base rectangle bounds
+        const left = cx - width/2;
+        const right = cx + width/2;
+        const top = cy - height/2;
+        const bottom = cy + height/2;
+
+        for (let i = 0; i < steps; i++) {
+            const t = i / steps;
+            const angle = t * Math.PI * 2;
+            
+            // Basic rectangular mapping based on angle to find perimeter point
+            // This is a crude way to map a circle to a rectangle to get perimeter points
+            let px, py;
+            // Scale angle to emphasize height over width for phone aspect
+            const sx = Math.cos(angle) * width/2;
+            const sy = Math.sin(angle) * height/2;
+            
+            // Clamping to create corners
+            px = cx + Math.max(-width/2, Math.min(width/2, sx * 1.2));
+            py = cy + Math.max(-height/2, Math.min(height/2, sy * 1.2));
+
+            // Apply heavy noise to erode the edges
+            // Using lower frequency for big wobbles, high freq for jaggy edges
+            const n1 = noise(px * 0.005 + seedOffset, py * 0.005 + seedOffset) - 0.5;
+            const n2 = noise(px * 0.02 + seedOffset, py * 0.02 + seedOffset) - 0.5;
+            
+            const erosion = (n1 * 150 * roughness) + (n2 * 40 * roughness);
+            
+            // Move point towards/away from center based on noise
+            const dx = px - cx;
+            const dy = py - cy;
+            const dist = Math.hypot(dx, dy);
+            const unitX = dx/dist;
+            const unitY = dy/dist;
+
+            points.push({
+                x: px + unitX * erosion,
+                y: py + unitY * erosion
+            });
+        }
+        return points;
+    }
+
+    // Renamed and modified for more irregular cavities
+    function generateCavityShape(cx, cy, avgSize, roughness, seedOffset) {
       const points = [];
-      const steps = 60; // Higher resolution for smoother stone
+      const steps = 40; 
       for (let i = 0; i < steps; i++) {
         const theta = (i / steps) * Math.PI * 2;
-        // Layered noise for "Rocky" feel
-        const n1 = noise(Math.cos(theta) * 3 + seedOffset, Math.sin(theta) * 3 + seedOffset);
-        const n2 = noise(Math.cos(theta) * 10 + seedOffset, Math.sin(theta) * 10 + seedOffset);
         
-        const r = radius * (0.8 + (n1 * 0.3 * roughness) + (n2 * 0.05 * roughness));
+        // Make the base shape less circular before noise
+        // Introduce a random warp factor based on angle
+        const baseWarp = 0.7 + Math.abs(Math.sin(theta*2 + seedOffset)) * 0.6; 
+        const baseRadius = avgSize * baseWarp;
+
+        const n1 = noise(Math.cos(theta) * 4 + seedOffset, Math.sin(theta) * 4 + seedOffset);
+        // Increased roughness impact for jaggy holes
+        const r = baseRadius * (0.7 + (n1 * 0.6 * roughness));
+        
         points.push({
           x: cx + Math.cos(theta) * r,
           y: cy + Math.sin(theta) * r
@@ -256,7 +349,7 @@
       return points;
     }
 
-    function smoothPoints(points, iterations=2) {
+    function smoothPoints(points, iterations=1) {
       let current = points;
       for(let k=0; k<iterations; k++) {
         const next = [];
@@ -264,10 +357,7 @@
           const prev = current[(i - 1 + current.length) % current.length];
           const pt = current[i];
           const nxt = current[(i + 1) % current.length];
-          next.push({
-            x: (prev.x + pt.x + nxt.x) / 3,
-            y: (prev.y + pt.y + nxt.y) / 3
-          });
+          next.push({ x: (prev.x + pt.x + nxt.x) / 3, y: (prev.y + pt.y + nxt.y) / 3 });
         }
         current = next;
       }
@@ -286,73 +376,68 @@
     }
 
     // --- Core Generation Logic ---
-    function generateGlyph() {
+    function generateTalisman() {
       initNoise();
       const numCavities = parseInt(document.getElementById('windows').value);
       const roughness = parseFloat(document.getElementById('roughness').value);
       
       state.cavities = [];
-      state.placedAssets = {}; // Clear placed assets on regen
+      state.placedAssets = {}; 
 
-      // 1. Generate Master Stone (The Container)
-      // We make it slightly smaller than canvas to ensure room for effects
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
-      const masterRadius = Math.min(canvas.width, canvas.height) * 0.45;
+      // 1. Generate Master Talisman Shape (Phone Proportions)
+      const phoneWidth = canvas.width * 0.55;
+      const phoneHeight = canvas.height * 0.85; // Taller aspect ratio
       
-      let outline = generateBlob(cx, cy, masterRadius, roughness, Math.random() * 100);
-      state.glyphOutline = smoothPoints(outline, 3);
+      let outline = generateTalismanShape(phoneWidth, phoneHeight, roughness, Math.random() * 100);
+      // Less smoothing to keep it rougher
+      state.talismanOutline = smoothPoints(outline, 2);
 
-      // 2. Carve Cavities (The Sculptural Step)
+      // 2. Carve Irregular Cavities
       let attempts = 0;
-      const maxAttempts = 200;
+      const maxAttempts = 300;
       
+      // Define useful area for cavities (exclude very edges and bottom text area)
+      const spawnBounds = {
+          minX: canvas.width/2 - phoneWidth*0.35,
+          maxX: canvas.width/2 + phoneWidth*0.35,
+          minY: canvas.height/2 - phoneHeight*0.4,
+          maxY: canvas.height/2 + phoneHeight*0.25 // Leave room at bottom for text
+      };
+
       while (state.cavities.length < numCavities && attempts < maxAttempts) {
         attempts++;
         
-        // Random position, biased slightly towards center
-        const r = Math.random() * (masterRadius * 0.7); 
-        const theta = Math.random() * Math.PI * 2;
-        const wx = cx + Math.cos(theta) * r;
-        const wy = cy + Math.sin(theta) * r;
+        const wx = spawnBounds.minX + Math.random() * (spawnBounds.maxX - spawnBounds.minX);
+        const wy = spawnBounds.minY + Math.random() * (spawnBounds.maxY - spawnBounds.minY);
         
-        const wSize = 50 + Math.random() * 80; // Size variation
+        const wSize = 40 + Math.random() * 70;
 
-        // A. Overlap Check (Cavity vs Cavity)
-        // We use a large multiplier (1.8) to ensure thick stone walls between cavities
+        // A. Overlap Check
         const overlapsOther = state.cavities.some(c => {
           const dist = Math.hypot(c.x - wx, c.y - wy);
-          return dist < (c.size + wSize) * 1.2; 
+          // Ensure significant space between cavities
+          return dist < (c.size + wSize) * 1.1; 
         });
         
         if (overlapsOther) continue;
 
-        // B. Encapsulation Check (Cavity vs Master Stone)
-        // We generate the candidate shape and check if all points are safely inside the master
-        let candidateShape = generateBlob(wx, wy, wSize, roughness * 0.8, Math.random()*100);
-        candidateShape = smoothPoints(candidateShape, 2);
+        // B. Encapsulation Check 
+        // Use new irregular cavity generation
+        let candidateShape = generateCavityShape(wx, wy, wSize, roughness * 1.2, Math.random()*500);
+        candidateShape = smoothPoints(candidateShape, 1); // Only 1 smooth pass for irregularity
         
         let fullyInside = true;
-        for(let pt of candidateShape) {
-            // Check if point is inside master stone
-            if(!isInside(pt.x, pt.y, state.glyphOutline)) {
-                fullyInside = false;
-                break;
+        // Check a few key points on the candidate shape
+        for(let i=0; i<candidateShape.length; i+=4) {
+            if(!isInside(candidateShape[i].x, candidateShape[i].y, state.talismanOutline)) {
+                fullyInside = false; break;
             }
-            
-            // Extra safety: Check distance to master edge (fake SDF)
-            // This is computationally expensive so we just trust the radius check mostly,
-            // but strict users want NO overlap.
-            // Simplified: if center + radius is > master boundaries roughly
         }
 
         if (fullyInside) {
           state.cavities.push({
             id: Date.now() + state.cavities.length,
-            x: wx,
-            y: wy,
-            size: wSize,
-            shape: candidateShape
+            x: wx, y: wy, size: wSize, shape: candidateShape
           });
         }
       }
@@ -364,257 +449,249 @@
     function render() {
       const lightVal = parseInt(document.getElementById('light').value);
       const lightAngle = (lightVal * Math.PI) / 180;
+      const roughness = parseFloat(document.getElementById('roughness').value);
       
-      // Clear
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (state.glyphOutline.length === 0) return;
+      if (state.talismanOutline.length === 0) return;
 
-      // 1. Draw Master Stone Body
+      // 1. Draw Master Talisman Body
       ctx.save();
       ctx.beginPath();
-      const pts = state.glyphOutline;
+      const pts = state.talismanOutline;
       ctx.moveTo(pts[0].x, pts[0].y);
       for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
       ctx.closePath();
-      
-      // Create clip mask for texture
       ctx.clip();
 
-      // Stone Base Color
+      // Darker, richer base stone color
       const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      grad.addColorStop(0, '#555');
-      grad.addColorStop(1, '#333');
+      grad.addColorStop(0, '#4a4a4a');
+      grad.addColorStop(1, '#2a2a2a');
       ctx.fillStyle = grad;
-      ctx.fill(); // Fill the clipped area
+      ctx.fill();
 
-      // 2. Procedural Texture (The "Rough Rocky" Look)
-      // We process pixels only inside the bounding box of the stone for performance
+      // 2. Enhanced Procedural Rocky Texture
       const imageData = ctx.getImageData(0,0, canvas.width, canvas.height);
       const data = imageData.data;
       
-      // Optimization: stride of 2 for performance, linear interpolation for look
-      for (let y = 0; y < canvas.height; y+=2) {
-        for (let x = 0; x < canvas.width; x+=2) {
-          // Quick check: only process roughly inside
+      // Stride of 1 for maximum detail on the rocky surface
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
           const idx = (y * canvas.width + x) * 4;
-          // Check alpha to see if we are inside the clipped stone
-          // Note: getImageData captures the fill we just did. 
-          if (data[idx+3] < 100) continue; 
+          if (data[idx+3] < 200) continue; // Skip outside stone
 
-          // Height map generation
-          // Low freq for shape, High freq for "grain"
-          const nx = x * 0.005; 
-          const ny = y * 0.005;
-          const h1 = noise(nx, ny);
-          const h2 = noise(nx*10, ny*10) * 0.1; // Grit
+          // Multi-layered noise for complex stone grain
+          const nx = x * 0.008; const ny = y * 0.008;
+          // Base structure
+          const h1 = noise(nx, ny); 
+          // Finer grit
+          const h2 = noise(nx*25, ny*25) * 0.15; 
+          // Deep fissures/cracks (very low frequency, high amplitude)
+          const fissure = Math.pow(noise(nx*0.3, ny*0.3), 3) * 0.4;
+
+          const heightMap = h1 + h2 - fissure;
           
-          // Normal map calculation
-          // We cheat and look at neighbor noise
-          const neighbors = noise(nx + 0.01, ny);
-          const slopeX = (h1 - neighbors) * 40; 
-          const slopeY = (h1 - noise(nx, ny + 0.01)) * 40;
+          // Normal map calculation (increased multipliers for deeper apparent texture)
+          const slopeX = (heightMap - noise(nx + 0.01, ny)) * 120 * roughness; 
+          const slopeY = (heightMap - noise(nx, ny + 0.01)) * 120 * roughness;
 
-          // Lighting math
-          // Rotate normal based on slope
+          // Lighting
           const dot = (Math.cos(lightAngle) * slopeX + Math.sin(lightAngle) * slopeY);
           
-          const highlight = Math.max(0, dot);
-          const shadow = Math.max(0, -dot);
+          // Sharper specular highlights for wet/crystalline rock look
+          const highlight = Math.pow(Math.max(0, dot), 4) * 1.5;
+          // Deeper shadows
+          const shadow = Math.max(0, -dot) * 1.2;
           
-          let color = data[idx]; // Base gray
-          color += highlight * 60;
-          color -= shadow * 80;
+          let r = data[idx], g = data[idx+1], b = data[idx+2];
           
-          // Noise texture
-          color += (Math.random() - 0.5) * 15;
+          r += highlight * 80 - shadow * 100;
+          g += highlight * 80 - shadow * 100;
+          b += highlight * 80 - shadow * 100;
+          
+          // Add mineral grit noise
+          const grit = (Math.random() - 0.5) * 30 * roughness;
 
-          data[idx] = data[idx+1] = data[idx+2] = Math.max(0, Math.min(255, color));
-          data[idx+3] = 255;
-          
-          // Fill the 2x2 block
-          const idx2 = idx + 4;
-          const idx3 = idx + canvas.width * 4;
-          const idx4 = idx3 + 4;
-          // (Omitting full 2x2 write for brevity, just keeping sparse or accepting aliasing for style)
+          data[idx] = Math.max(0, Math.min(255, r + grit));
+          data[idx+1] = Math.max(0, Math.min(255, g + grit));
+          data[idx+2] = Math.max(0, Math.min(255, b + grit));
         }
       }
       ctx.putImageData(imageData, 0, 0);
       ctx.restore();
 
-      // 3. Draw Cavities (Shadows & Depth)
+      // 3. Draw Cavities & Assets
       state.cavities.forEach(cavity => {
         // Drop Shadow (Ambient Occlusion inside hole)
         ctx.save();
-        
-        // Inner Shadow (Simulating depth)
-        ctx.translate(Math.cos(lightAngle)*2, Math.sin(lightAngle)*2);
-        
+        // Deeper inner shadow offset based on light
+        ctx.translate(Math.cos(lightAngle)*4, Math.sin(lightAngle)*4);
         ctx.beginPath();
         ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
         for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
         ctx.closePath();
-        
-        ctx.fillStyle = '#0a0a0a'; // Deep black hole
+        ctx.fillStyle = '#050505'; 
         ctx.fill();
 
-        // Inner Bevel Highlight (Rim light on the opposite side of light source)
-        ctx.strokeStyle = `rgba(255,255,255,0.2)`;
-        ctx.lineWidth = 2;
+        // Inner Rim Highlight (opposite light)
+        ctx.translate(-Math.cos(lightAngle)*5, -Math.sin(lightAngle)*5);
+        ctx.strokeStyle = `rgba(255,255,255,0.25)`;
+        ctx.lineWidth = 3;
         ctx.stroke();
-        
         ctx.restore();
 
-        // 4. Render Asset inside Cavity
-        if (state.placedAssets[cavity.id]) {
-          const imgKey = state.placedAssets[cavity.id];
-          if (state.images[imgKey]) {
+        // Render Asset
+        if (state.placedAssets[cavity.id] && state.images[state.placedAssets[cavity.id]]) {
             ctx.save();
-            
-            // Clip to cavity shape
             ctx.beginPath();
             ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
             for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
             ctx.closePath();
             ctx.clip();
             
-            // Draw Image centered
-            const img = state.images[imgKey];
-            const scale = (cavity.size * 2) / Math.max(img.width, img.height) * 0.8; // 80% fit
+            const img = state.images[state.placedAssets[cavity.id]];
+            // Fit tighter in the irregular holes
+            const scale = (cavity.size * 2) / Math.max(img.width, img.height) * 0.7; 
             const drawW = img.width * scale;
             const drawH = img.height * scale;
             
-            ctx.drawImage(img, 
-              cavity.x - drawW/2, 
-              cavity.y - drawH/2, 
-              drawW, drawH
-            );
+            // Add a glow to the asset itself
+            ctx.shadowColor = varToString('--accent');
+            ctx.shadowBlur = 15;
             
-            // Inner Shadow Overlay to make asset look "inside"
+            ctx.drawImage(img, cavity.x - drawW/2, cavity.y - drawH/2, drawW, drawH);
+            
+            // Inner shadow overlay
             ctx.shadowColor = "black";
-            ctx.shadowBlur = 20;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-            ctx.strokeStyle = "rgba(0,0,0,0.5)";
-            ctx.lineWidth = 4;
+            ctx.shadowBlur = 25;
+            ctx.strokeStyle = "rgba(0,0,0,0.6)";
+            ctx.lineWidth = 6;
             ctx.stroke();
-            
             ctx.restore();
-          }
         }
       });
       
-      // 5. Final Edge Rim Light (Outer Stone)
+      // 4. Final Edge Rim Light
       ctx.save();
       ctx.beginPath();
-      ctx.moveTo(state.glyphOutline[0].x, state.glyphOutline[0].y);
-      for(let p of state.glyphOutline) ctx.lineTo(p.x, p.y);
+      ctx.moveTo(state.talismanOutline[0].x, state.talismanOutline[0].y);
+      for(let p of state.talismanOutline) ctx.lineTo(p.x, p.y);
       ctx.closePath();
-      
-      // Top edge highlight based on light angle
-      ctx.shadowColor = 'rgba(255,255,255,0.4)';
-      ctx.shadowBlur = 2;
-      ctx.shadowOffsetX = -Math.cos(lightAngle) * 2;
-      ctx.shadowOffsetY = -Math.sin(lightAngle) * 2;
-      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.shadowColor = 'rgba(255,255,255,0.5)';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = -Math.cos(lightAngle) * 4;
+      ctx.shadowOffsetY = -Math.sin(lightAngle) * 4;
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 2;
       ctx.stroke();
       ctx.restore();
+
+      // 5. Render Intention Text (Engraved Effect)
+      if(state.intentionText) {
+          renderEngravedText(state.intentionText, lightAngle);
+      }
     }
 
-    // --- Interaction ---
+    // Helper to get CSS variable color
+    function varToString(varName) {
+        return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    }
+
+    function renderEngravedText(text, lightAngle) {
+        ctx.save();
+        const fontSize = 32;
+        ctx.font = `bold ${fontSize}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.letterSpacing = '4px';
+
+        // Position near the bottom of the stone bounds
+        const textX = canvas.width / 2;
+        const textY = canvas.height * 0.85; 
+
+        // Calculate offsets for engraving effect based on light angle
+        // Light coming from top-left means shadow is bottom-right, highlight is top-left
+        const shadowOffsetX = Math.cos(lightAngle) * 2;
+        const shadowOffsetY = Math.sin(lightAngle) * 2;
+        const highlightOffsetX = -Math.cos(lightAngle) * 1.5;
+        const highlightOffsetY = -Math.sin(lightAngle) * 1.5;
+
+        // 1. Draw Highlight (the edge catching light)
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.fillText(text, textX + highlightOffsetX, textY + highlightOffsetY);
+
+        // 2. Draw Shadow (the deep part)
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillText(text, textX + shadowOffsetX, textY + shadowOffsetY);
+
+        // 3. Draw the "bottom" of the engraving (dark stone color)
+        ctx.fillStyle = '#2a2a2a';
+        ctx.fillText(text, textX, textY);
+        
+        ctx.restore();
+    }
+
+
+    // --- Interaction & Setup ---
     function loadAssets() {
       const grid = document.getElementById('assetGrid');
       grid.innerHTML = '';
-      
       assetFilenames.forEach(filename => {
-        // Preload Image object
         const img = new Image();
         img.src = ASSET_PATH + filename;
-        img.onload = () => {
-          state.images[filename] = img;
-        };
-
-        // Create UI Element
+        img.onload = () => { state.images[filename] = img; };
         const div = document.createElement('div');
         div.className = 'asset-item';
         div.draggable = true;
-        
-        // Thumbnail
         const thumb = document.createElement('img');
         thumb.src = ASSET_PATH + filename;
         div.appendChild(thumb);
-        
-        // Drag Events
         div.addEventListener('dragstart', (e) => {
           draggedAssetKey = filename;
           e.dataTransfer.setData('text/plain', filename);
         });
-        
-        // Click Events (Mobile/Tablet)
-        div.addEventListener('click', () => {
-          document.querySelectorAll('.asset-item').forEach(d => d.classList.remove('selected'));
-          div.classList.add('selected');
-          draggedAssetKey = filename;
-        });
-
         grid.appendChild(div);
       });
     }
 
-    // Canvas Drop Handling
     canvas.addEventListener('dragover', e => e.preventDefault());
     canvas.addEventListener('drop', e => {
       e.preventDefault();
-      handleInteraction(e.clientX, e.clientY);
-    });
-
-    canvas.addEventListener('click', e => {
-      if(draggedAssetKey) handleInteraction(e.clientX, e.clientY);
-    });
-
-    function handleInteraction(clientX, clientY) {
-      if(!draggedAssetKey) return;
-      
       const rect = canvas.getBoundingClientRect();
-      const x = (clientX - rect.left) * (canvas.width / rect.width);
-      const y = (clientY - rect.top) * (canvas.height / rect.height);
-      
-      // Find cavity under mouse
+      const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const y = (e.clientY - rect.top) * (canvas.height / rect.height);
       const target = state.cavities.find(c => isInside(x, y, c.shape));
-      
       if(target) {
         state.placedAssets[target.id] = draggedAssetKey;
         render();
       }
-    }
+    });
 
-    function clearAssets() {
-      state.placedAssets = {};
-      render();
-    }
-
+    function clearAssets() { state.placedAssets = {}; render(); }
     function exportImage() {
       const link = document.createElement('a');
-      link.download = `Spec_Geo_Scan_${Date.now()}.png`;
-      link.href = canvas.toDataURL();
+      link.download = `Talisman_${state.intentionText ? state.intentionText.substring(0,10) : 'Scan'}_${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
     }
 
-    // --- Init ---
-    document.querySelectorAll('input').forEach(el => {
+    // Input Listeners
+    document.getElementById('intentionInput').addEventListener('input', (e) => {
+        state.intentionText = e.target.value.toUpperCase();
+        render();
+    });
+
+    document.querySelectorAll('input[type=range]').forEach(el => {
       el.addEventListener('input', (e) => {
-        // Update label text
-        const labelSpan = document.getElementById('val-' + e.target.id);
-        if(labelSpan) labelSpan.textContent = e.target.value;
-        
-        // If it's light, just re-render. If it's geometry, regen.
-        if(e.target.id === 'light') render();
-        else generateGlyph();
+        document.getElementById('val-' + e.target.id).textContent = e.target.value;
+        if(e.target.id === 'light') render(); else generateTalisman();
       })
     });
 
     loadAssets();
-    setTimeout(generateGlyph, 100); // Slight delay to ensure assets start loading
+    // Give images a moment to load before first generation
+    setTimeout(generateTalisman, 300); 
   </script>
 </body>
 </html>
