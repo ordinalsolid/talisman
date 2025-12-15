@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stone Glyph Art Creator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      opacity: 0.9;
+      font-size: 1.1em;
+    }
+    
+    .main {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    .sidebar {
+      width: 250px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .control-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    
+    .control-section h3 {
+      margin-bottom: 15px;
+      color: #333;
+      font-size: 1.1em;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #48bb78;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #38a169;
+      transform: translateY(-2px);
+    }
+    
+    .btn-danger {
+      background: #f56565;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #e53e3e;
+    }
+    
+    .slider-group {
+      margin-bottom: 15px;
+    }
+    
+    .slider-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #ddd;
+      outline: none;
+    }
+    
+    .assets-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    
+    .asset-item {
+      aspect-ratio: 1;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      transition: all 0.2s;
+      font-size: 2em;
+    }
+    
+    .asset-item:hover {
+      border-color: #667eea;
+      transform: scale(1.05);
+    }
+    
+    .asset-item:active {
+      cursor: grabbing;
+    }
+    
+    .canvas-container {
+      flex: 1;
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    canvas {
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      background: #2a2a2a;
+      cursor: crosshair;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    @media (max-width: 968px) {
+      .main {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+      }
+      
+      .assets-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🗿 Stone Glyph Art Creator</h1>
+      <p>Create dimensional stone glyphs with carved windows</p>
+    </div>
+    
+    <div class="main">
+      <div class="sidebar">
+        <div class="control-section">
+          <h3>Glyph Controls</h3>
+          <div class="slider-group">
+            <label>Windows: <span id="windowsValue">8</span></label>
+            <input type="range" id="windows" min="6" max="10" value="8">
+          </div>
+          <div class="slider-group">
+            <label>Roughness: <span id="roughnessValue">0.6</span></label>
+            <input type="range" id="roughness" min="0.2" max="1" step="0.1" value="0.6">
+          </div>
+          <div class="slider-group">
+            <label>Depth: <span id="depthValue">0.7</span></label>
+            <input type="range" id="depth" min="0.3" max="1" step="0.1" value="0.7">
+          </div>
+          <button class="btn btn-primary" onclick="generateGlyph()">🔄 Regenerate Glyph</button>
+          <button class="btn btn-danger" onclick="clearAssets()">🗑️ Clear Assets</button>
+        </div>
+        
+        <div class="control-section">
+          <h3>Asset Library</h3>
+          <div class="assets-grid">
+            <div class="asset-item" draggable="true" data-asset="⭐">⭐</div>
+            <div class="asset-item" draggable="true" data-asset="🌙">🌙</div>
+            <div class="asset-item" draggable="true" data-asset="☀️">☀️</div>
+            <div class="asset-item" draggable="true" data-asset="🌸">🌸</div>
+            <div class="asset-item" draggable="true" data-asset="🍃">🍃</div>
+            <div class="asset-item" draggable="true" data-asset="💎">💎</div>
+            <div class="asset-item" draggable="true" data-asset="🦋">🦋</div>
+            <div class="asset-item" draggable="true" data-asset="🌊">🌊</div>
+          </div>
+        </div>
+        
+        <div class="control-section">
+          <h3>Export</h3>
+          <button class="btn btn-secondary" onclick="exportImage()">📥 Download Image</button>
+        </div>
+      </div>
+      
+      <div class="canvas-container">
+        <canvas id="canvas" width="600" height="1000"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let glyphShape = [];
+    let windows = [];
+    let placedAssets = {};
+    let draggedAsset = null;
+
+    // Update slider displays
+    document.getElementById('windows').addEventListener('input', (e) => {
+      document.getElementById('windowsValue').textContent = e.target.value;
+    });
+    
+    document.getElementById('roughness').addEventListener('input', (e) => {
+      document.getElementById('roughnessValue').textContent = e.target.value;
+    });
+    
+    document.getElementById('depth').addEventListener('input', (e) => {
+      document.getElementById('depthValue').textContent = e.target.value;
+    });
+
+    function generateRoughEdge(x1, y1, x2, y2, roughness) {
+      const points = [];
+      const dist = Math.hypot(x2 - x1, y2 - y1);
+      const segments = Math.floor(dist / 20);
+      
+      for (let i = 0; i <= segments; i++) {
+        const t = i / segments;
+        const x = x1 + (x2 - x1) * t;
+        const y = y1 + (y2 - y1) * t;
+        
+        const offsetX = (Math.random() - 0.5) * roughness * 30;
+        const offsetY = (Math.random() - 0.5) * roughness * 30;
+        
+        points.push({ x: x + offsetX, y: y + offsetY });
+      }
+      
+      return points;
+    }
+
+    function generateGlyph() {
+      const windowCount = parseInt(document.getElementById('windows').value);
+      const roughness = parseFloat(document.getElementById('roughness').value);
+      const depth = parseFloat(document.getElementById('depth').value);
+      
+      glyphShape = [];
+      windows = [];
+      placedAssets = {};
+      
+      // Create phone-shaped outline with rough edges
+      const margin = 80;
+      const width = canvas.width - margin * 2;
+      const height = canvas.height - margin * 2;
+      const cornerRadius = 60;
+      
+      // Generate rough outline points
+      const outline = [];
+      
+      // Top edge
+      outline.push(...generateRoughEdge(
+        margin + cornerRadius, margin,
+        margin + width - cornerRadius, margin,
+        roughness
+      ));
+      
+      // Top-right corner
+      for (let a = -Math.PI/2; a <= 0; a += 0.3) {
+        const x = margin + width - cornerRadius + Math.cos(a) * cornerRadius;
+        const y = margin + cornerRadius + Math.sin(a) * cornerRadius;
+        outline.push({
+          x: x + (Math.random() - 0.5) * roughness * 30,
+          y: y + (Math.random() - 0.5) * roughness * 30
+        });
+      }
+      
+      // Right edge
+      outline.push(...generateRoughEdge(
+        margin + width, margin + cornerRadius,
+        margin + width, margin + height - cornerRadius,
+        roughness
+      ));
+      
+      // Bottom-right corner
+      for (let a = 0; a <= Math.PI/2; a += 0.3) {
+        const x = margin + width - cornerRadius + Math.cos(a) * cornerRadius;
+        const y = margin + height - cornerRadius + Math.sin(a) * cornerRadius;
+        outline.push({
+          x: x + (Math.random() - 0.5) * roughness * 30,
+          y: y + (Math.random() - 0.5) * roughness * 30
+        });
+      }
+      
+      // Bottom edge
+      outline.push(...generateRoughEdge(
+        margin + width - cornerRadius, margin + height,
+        margin + cornerRadius, margin + height,
+        roughness
+      ));
+      
+      // Bottom-left corner
+      for (let a = Math.PI/2; a <= Math.PI; a += 0.3) {
+        const x = margin + cornerRadius + Math.cos(a) * cornerRadius;
+        const y = margin + height - cornerRadius + Math.sin(a) * cornerRadius;
+        outline.push({
+          x: x + (Math.random() - 0.5) * roughness * 30,
+          y: y + (Math.random() - 0.5) * roughness * 30
+        });
+      }
+      
+      // Left edge
+      outline.push(...generateRoughEdge(
+        margin, margin + height - cornerRadius,
+        margin, margin + cornerRadius,
+        roughness
+      ));
+      
+      // Top-left corner
+      for (let a = Math.PI; a <= Math.PI * 1.5; a += 0.3) {
+        const x = margin + cornerRadius + Math.cos(a) * cornerRadius;
+        const y = margin + cornerRadius + Math.sin(a) * cornerRadius;
+        outline.push({
+          x: x + (Math.random() - 0.5) * roughness * 30,
+          y: y + (Math.random() - 0.5) * roughness * 30
+        });
+      }
+      
+      glyphShape = outline;
+      
+      // Generate window positions
+      const windowMargin = 100;
+      const windowWidth = width - windowMargin * 2;
+      const windowHeight = height - windowMargin * 2;
+      
+      for (let i = 0; i < windowCount; i++) {
+        let attempts = 0;
+        let window;
+        
+        do {
+          const x = margin + windowMargin + Math.random() * windowWidth;
+          const y = margin + windowMargin + Math.random() * windowHeight;
+          const size = 50 + Math.random() * 50;
+          
+          window = { id: i, x, y, size, depth };
+          attempts++;
+        } while (
+          attempts < 50 &&
+          windows.some(w => Math.hypot(w.x - window.x, w.y - window.y) < (w.size + window.size) * 0.8)
+        );
+        
+        if (attempts < 50) {
+          windows.push(window);
+        }
+      }
+      
+      draw();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw stone texture background
+      for (let i = 0; i < 3000; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const shade = 40 + Math.random() * 20;
+        ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+      
+      // Draw main glyph shape with carved stone effect
+      if (glyphShape.length > 0) {
+        // Draw shadow/depth
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        ctx.shadowBlur = 30;
+        ctx.shadowOffsetX = 10;
+        ctx.shadowOffsetY = 10;
+        
+        ctx.beginPath();
+        ctx.moveTo(glyphShape[0].x, glyphShape[0].y);
+        for (let i = 1; i < glyphShape.length; i++) {
+          ctx.lineTo(glyphShape[i].x, glyphShape[i].y);
+        }
+        ctx.closePath();
+        
+        // Stone gradient
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#9ca3af');
+        gradient.addColorStop(0.5, '#6b7280');
+        gradient.addColorStop(1, '#4b5563');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        ctx.restore();
+        
+        // Add stone texture
+        ctx.save();
+        ctx.clip();
+        for (let i = 0; i < 5000; i++) {
+          const x = Math.random() * canvas.width;
+          const y = Math.random() * canvas.height;
+          if (ctx.isPointInPath(x, y)) {
+            const shade = 100 + Math.random() * 50;
+            ctx.fillStyle = `rgba(${shade}, ${shade}, ${shade}, 0.3)`;
+            ctx.fillRect(x, y, 2, 2);
+          }
+        }
+        ctx.restore();
+        
+        // Edge highlights
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      
+      // Draw windows (carved openings)
+      windows.forEach(window => {
+        const sides = 5 + Math.floor(Math.random() * 2);
+        
+        // Draw inner shadow (depth)
+        ctx.save();
+        ctx.translate(window.x, window.y);
+        
+        // Deep shadow
+        ctx.beginPath();
+        for (let i = 0; i <= sides; i++) {
+          const angle = (i / sides) * Math.PI * 2 - Math.PI / 2;
+          const r = window.size * (0.9 + Math.random() * 0.2);
+          const x = Math.cos(angle) * r;
+          const y = Math.sin(angle) * r;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        
+        const depthGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, window.size);
+        depthGradient.addColorStop(0, '#1a1a1a');
+        depthGradient.addColorStop(1, '#000000');
+        ctx.fillStyle = depthGradient;
+        ctx.fill();
+        
+        // Inner highlight
+        ctx.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.restore();
+        
+        // Draw placed asset
+        if (placedAssets[window.id]) {
+          ctx.save();
+          ctx.translate(window.x, window.y);
+          ctx.font = `${window.size * 1.2}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 5;
+          ctx.fillText(placedAssets[window.id], 0, 0);
+          ctx.restore();
+        }
+      });
+    }
+
+    function findWindowAtPoint(x, y) {
+      let closest = null;
+      let minDist = Infinity;
+      
+      windows.forEach(window => {
+        const dist = Math.hypot(window.x - x, window.y - y);
+        if (dist < window.size && dist < minDist) {
+          minDist = dist;
+          closest = window;
+        }
+      });
+      
+      return closest;
+    }
+
+    // Drag and drop functionality
+    document.querySelectorAll('.asset-item').forEach(item => {
+      item.addEventListener('dragstart', (e) => {
+        draggedAsset = e.target.dataset.asset;
+      });
+    });
+
+    canvas.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+
+    canvas.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const window = findWindowAtPoint(x, y);
+      if (window && draggedAsset) {
+        placedAssets[window.id] = draggedAsset;
+        draw();
+      }
+      
+      draggedAsset = null;
+    });
+
+    // Click to place (mobile friendly)
+    let selectedAsset = null;
+    
+    document.querySelectorAll('.asset-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.asset-item').forEach(i => 
+          i.style.borderColor = '#e2e8f0'
+        );
+        item.style.borderColor = '#667eea';
+        selectedAsset = item.dataset.asset;
+      });
+    });
+
+    canvas.addEventListener('click', (e) => {
+      if (!selectedAsset) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const window = findWindowAtPoint(x, y);
+      if (window) {
+        placedAssets[window.id] = selectedAsset;
+        draw();
+      }
+    });
+
+    function clearAssets() {
+      placedAssets = {};
+      draw();
+    }
+
+    function exportImage() {
+      const link = document.createElement('a');
+      link.download = `stone-glyph-art-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // Initialize
+    generateGlyph();
+  </script>
+</body>
+</html>
