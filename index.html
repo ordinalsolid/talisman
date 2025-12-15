@@ -1,136 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Stone Glyph Art Creator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<title>Geological Glyph Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
+  background: #000;
+  color: #eee;
   font-family: system-ui, sans-serif;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  min-height: 100vh;
-  padding: 20px;
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 1500px;
   margin: auto;
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0,0,0,.35);
-}
-
-.header {
-  padding: 30px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  text-align: center;
-}
-
-.main {
+  padding: 20px;
   display: flex;
   gap: 20px;
-  padding: 20px;
 }
 
 .sidebar {
-  width: 260px;
+  width: 320px;
+  background: #111;
+  border-radius: 14px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
 }
 
-.control-section {
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 12px;
+.sidebar button {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #333;
+  color: #eee;
+  cursor: pointer;
+}
+
+.assets {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .assets-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
-.asset-item {
+.asset {
   aspect-ratio: 1;
-  background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  background: #222;
+  border-radius: 6px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: 0.2s;
+  border: 2px solid transparent;
 }
 
-.asset-item.selected {
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102,126,234,.4);
+.asset.selected {
+  border-color: #aaa;
 }
 
-.asset-item img {
-  width: 80%;
-  height: 80%;
+.asset img {
+  width: 85%;
+  height: 85%;
   object-fit: contain;
   pointer-events: none;
 }
 
-.canvas-container {
+.canvas-wrap {
   flex: 1;
-  background: #eee;
-  padding: 20px;
-  border-radius: 12px;
   display: flex;
   justify-content: center;
 }
 
 canvas {
-  background: #111;
-  border-radius: 12px;
-  cursor: crosshair;
+  background: #000;
+  border-radius: 18px;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-  <div class="header">
-    <h1>Stone Glyph Art Creator</h1>
-    <p>Select an asset → hover a cavity → click to place</p>
-  </div>
 
-  <div class="main">
-    <div class="sidebar">
-      <div class="control-section">
-        <button onclick="generateGlyph()">Regenerate Glyph</button>
-        <button onclick="clearAssets()">Clear Assets</button>
-      </div>
+  <div class="sidebar">
+    <button onclick="generate()">Regenerate Stone</button>
+    <button onclick="clearAssets()">Clear Assets</button>
 
-      <div class="control-section">
-        <h3>Assets</h3>
-         <h3>Assets</h3>
-        <div class="assets-grid">
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0001.png"><img src="Spec_Geo_Assets/speculative_geologies_0001.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0008b.png"><img src="Spec_Geo_Assets/speculative_geologies_0008b.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0023c.png"><img src="Spec_Geo_Assets/speculative_geologies_0023c.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0047a.png"><img src="Spec_Geo_Assets/speculative_geologies_0047a.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0055d.png"><img src="Spec_Geo_Assets/speculative_geologies_0055d.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0056b.png"><img src="Spec_Geo_Assets/speculative_geologies_0056b.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0058d.png"><img src="Spec_Geo_Assets/speculative_geologies_0058d.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0063a.png"><img src="Spec_Geo_Assets/speculative_geologies_0063a.png"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="canvas-container">
-      <canvas id="canvas" width="600" height="1000"></canvas>
+    <div class="assets">
+      <div class="assets-grid" id="assetGrid"></div>
     </div>
   </div>
+
+  <div class="canvas-wrap">
+    <canvas id="canvas" width="720" height="1080"></canvas>
+  </div>
+
 </div>
 
 <script>
@@ -140,237 +112,220 @@ const ctx = canvas.getContext("2d");
 let cavities = [];
 let outline = [];
 let placedAssets = {};
+let hovered = null;
 let selectedAsset = null;
-let hoveredCavity = null;
 
-/* ---------------- IMAGE CACHE ---------------- */
-const assetCache = {};
-function loadAsset(src) {
-  if (assetCache[src]) return assetCache[src];
-  const img = new Image();
-  img.onload = draw;
-  img.src = src;
-  assetCache[src] = img;
-  return img;
+const assetPaths = [
+  "Spec_Geo_Assets/asset_star.png",
+  "Spec_Geo_Assets/asset_moon.png",
+  "Spec_Geo_Assets/asset_sun.png",
+  "Spec_Geo_Assets/asset_flower.png",
+  "Spec_Geo_Assets/asset_leaf.png",
+  "Spec_Geo_Assets/asset_gem.png",
+  "Spec_Geo_Assets/asset_wave.png",
+  "Spec_Geo_Assets/asset_eye.png",
+  "Spec_Geo_Assets/asset_shell.png",
+  "Spec_Geo_Assets/asset_spiral.png",
+  "Spec_Geo_Assets/asset_bone.png",
+  "Spec_Geo_Assets/asset_cross.png"
+];
+
+const imgCache = {};
+function loadImg(src) {
+  if (imgCache[src]) return imgCache[src];
+  const i = new Image();
+  i.src = src;
+  imgCache[src] = i;
+  return i;
 }
 
-/* ---------------- GEOMETRY ---------------- */
-function dist(a, b) {
-  return Math.hypot(a.x - b.x, a.y - b.y);
-}
+/* ---------- UI ---------- */
+const grid = document.getElementById("assetGrid");
+assetPaths.forEach(src => {
+  const d = document.createElement("div");
+  d.className = "asset";
+  d.innerHTML = `<img src="${src}">`;
+  d.onclick = () => {
+    document.querySelectorAll(".asset").forEach(a => a.classList.remove("selected"));
+    d.classList.add("selected");
+    selectedAsset = src;
+  };
+  grid.appendChild(d);
+});
 
-function organicShape(cx, cy, r, points = 32) {
-  const pts = [];
-  for (let i = 0; i < points; i++) {
-    const a = (i / points) * Math.PI * 2;
-    const jitter = r * (0.75 + Math.random() * 0.5);
-    pts.push({
-      x: cx + Math.cos(a) * jitter,
-      y: cy + Math.sin(a) * jitter
-    });
+/* ---------- GEOMETRY ---------- */
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+
+function organic(cx,cy,r,n=36){
+  const pts=[];
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2;
+    const e=r*(0.65+Math.random()*0.55);
+    pts.push({x:cx+Math.cos(a)*e,y:cy+Math.sin(a)*e});
   }
   return pts;
 }
 
-function drawPath(p) {
+function drawPath(p){
   ctx.beginPath();
-  ctx.moveTo(p[0].x, p[0].y);
-  p.forEach(pt => ctx.lineTo(pt.x, pt.y));
+  ctx.moveTo(p[0].x,p[0].y);
+  p.forEach(pt=>ctx.lineTo(pt.x,pt.y));
   ctx.closePath();
 }
 
-function pointInPoly(x, y, poly) {
-  let inside = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const xi = poly[i].x, yi = poly[i].y;
-    const xj = poly[j].x, yj = poly[j].y;
-    const intersect =
-      ((yi > y) !== (yj > y)) &&
-      (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-    if (intersect) inside = !inside;
+function inside(x,y,p){
+  let c=false;
+  for(let i=0,j=p.length-1;i<p.length;j=i++){
+    ((p[i].y>y)!==(p[j].y>y)) &&
+    x<(p[j].x-p[i].x)*(y-p[i].y)/(p[j].y-p[i].y)+p[i].x &&
+    (c=!c);
   }
-  return inside;
+  return c;
 }
 
-/* ---------------- CONVEX HULL ---------------- */
-function convexHull(points) {
-  points = [...points].sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
-  const cross = (o, a, b) =>
-    (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+/* ---------- GENERATION ---------- */
+function generate(){
+  cavities=[];
+  placedAssets={};
 
-  const lower = [];
-  for (const p of points) {
-    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0)
-      lower.pop();
-    lower.push(p);
-  }
+  const count=6+Math.floor(Math.random()*5);
+  let id=0;
 
-  const upper = [];
-  for (let i = points.length - 1; i >= 0; i--) {
-    const p = points[i];
-    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0)
-      upper.pop();
-    upper.push(p);
-  }
-
-  upper.pop();
-  lower.pop();
-  return lower.concat(upper);
-}
-
-/* ---------------- GENERATION ---------------- */
-function generateGlyph() {
-  cavities = [];
-  placedAssets = {};
-  hoveredCavity = null;
-
-  const count = 6 + Math.floor(Math.random() * 5);
-  const maxTries = 500;
-
-  let tries = 0;
-  while (cavities.length < count && tries < maxTries) {
-    tries++;
-
-    const r = 35 + Math.random() * 35;
-    const c = {
-      x: canvas.width / 2 + (Math.random() - 0.5) * 280,
-      y: canvas.height / 2 + (Math.random() - 0.5) * 420,
+  while(cavities.length<count){
+    const r=40+Math.random()*40;
+    const c={
+      id:id++,
+      x:canvas.width/2+(Math.random()-0.5)*320,
+      y:canvas.height/2+(Math.random()-0.5)*480,
       r
     };
-
-    if (cavities.every(o => dist(c, o) > c.r + o.r + 20)) {
-      c.shape = organicShape(c.x, c.y, c.r);
+    if(cavities.every(o=>dist(c,o)>c.r+o.r+28)){
+      c.shape=organic(c.x,c.y,c.r);
       cavities.push(c);
     }
   }
 
-  // Build outline from cavity centers
-  const hull = convexHull(cavities.map(c => ({ x: c.x, y: c.y })));
-
-  outline = hull.map(p => {
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const dx = p.x - cx;
-    const dy = p.y - cy;
-    const len = Math.hypot(dx, dy);
-    const expand = 120 + Math.random() * 40;
-    return {
-      x: p.x + (dx / len) * expand,
-      y: p.y + (dy / len) * expand
-    };
-  });
-
-  outline = organicShape(
-    canvas.width / 2,
-    canvas.height / 2,
-    Math.max(canvas.width, canvas.height) / 2.4,
-    64
-  ).map((p, i) => outline[i % outline.length] || p);
-
+  buildOutline();
   draw();
 }
 
-/* ---------------- TEXTURE ---------------- */
-function rockTexture() {
-  const img = ctx.createImageData(canvas.width, canvas.height);
-  for (let i = 0; i < img.data.length; i += 4) {
-    const n = Math.random() * 50;
-    img.data[i] = img.data[i + 1] = img.data[i + 2] = 90 + n;
-    img.data[i + 3] = 255;
+function buildOutline(){
+  outline=[];
+  const cx=canvas.width/2;
+  const cy=canvas.height/2;
+
+  const steps=160;
+  for(let i=0;i<steps;i++){
+    const a=i/steps*Math.PI*2;
+    let d=0;
+
+    cavities.forEach(c=>{
+      const dx=Math.cos(a)*(c.x-cx)+Math.sin(a)*(c.y-cy);
+      const influence=Math.max(0,c.r*1.8-dx);
+      d+=influence;
+    });
+
+    d=180+d*0.45+Math.random()*20;
+    outline.push({
+      x:cx+Math.cos(a)*d,
+      y:cy+Math.sin(a)*d
+    });
   }
-  ctx.putImageData(img, 0, 0);
 }
 
-/* ---------------- DRAW ---------------- */
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+/* ---------- TEXTURE ---------- */
+function rockFill(){
+  const g=ctx.createLinearGradient(0,0,0,canvas.height);
+  g.addColorStop(0,"#555");
+  g.addColorStop(1,"#111");
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // Background
-  ctx.fillStyle = "#111";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  for(let i=0;i<70000;i++){
+    ctx.fillStyle=`rgba(${80+Math.random()*50},${80+Math.random()*50},${80+Math.random()*50},0.05)`;
+    ctx.fillRect(Math.random()*canvas.width,Math.random()*canvas.height,1,1);
+  }
 
-  // Rock base
+  ctx.globalCompositeOperation="multiply";
+  for(let y=0;y<canvas.height;y+=6){
+    ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.08})`;
+    ctx.fillRect(0,y,canvas.width,3);
+  }
+  ctx.globalCompositeOperation="source-over";
+}
+
+/* ---------- DRAW ---------- */
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
   drawPath(outline);
   ctx.save();
   ctx.clip();
-
-  rockTexture();
-
-  // Light from above
-  const light = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  light.addColorStop(0, "rgba(255,255,255,0.35)");
-  light.addColorStop(1, "rgba(0,0,0,0.5)");
-  ctx.fillStyle = light;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+  rockFill();
   ctx.restore();
 
-  // Cavities
-  cavities.forEach(c => {
+  cavities.forEach(c=>{
     drawPath(c.shape);
-    ctx.fillStyle = "#050505";
+    ctx.fillStyle="#050505";
     ctx.fill();
 
-    // Rim shading
-    const g = ctx.createRadialGradient(c.x, c.y - c.r * 0.4, c.r * 0.2, c.x, c.y, c.r);
-    g.addColorStop(0, "rgba(255,255,255,0.15)");
-    g.addColorStop(1, "rgba(0,0,0,0.7)");
-    ctx.fillStyle = g;
+    const g=ctx.createRadialGradient(c.x,c.y-c.r*0.3,c.r*0.2,c.x,c.y,c.r);
+    g.addColorStop(0,"rgba(255,255,255,0.18)");
+    g.addColorStop(1,"rgba(0,0,0,0.75)");
+    ctx.fillStyle=g;
     ctx.fill();
 
-    if (c === hoveredCavity) {
-      ctx.strokeStyle = "rgba(255,255,255,0.4)";
-      ctx.lineWidth = 2;
+    if(c===hovered){
+      ctx.strokeStyle="rgba(255,255,255,0.4)";
+      ctx.lineWidth=2;
       ctx.stroke();
     }
 
-    if (placedAssets[c]) {
-      const { src, depth } = placedAssets[c];
-      const img = loadAsset(src);
-      const size = c.r * 2 * (1.3 - depth * 0.4);
+    const p=placedAssets[c.id];
+    if(p){
+      const img=loadImg(p.src);
+      const size=c.r*2*(1.25-p.depth*0.35);
       ctx.save();
-      ctx.translate(c.x, c.y);
-      ctx.shadowColor = "rgba(0,0,0,0.8)";
-      ctx.shadowBlur = 25 * depth;
-      ctx.shadowOffsetY = 12 * depth;
-      ctx.drawImage(img, -size / 2, -size / 2, size, size);
+      ctx.translate(c.x,c.y);
+      ctx.shadowColor="rgba(0,0,0,0.9)";
+      ctx.shadowBlur=30*p.depth;
+      ctx.shadowOffsetY=14*p.depth;
+      ctx.drawImage(img,-size/2,-size/2,size,size);
       ctx.restore();
     }
   });
 }
 
-/* ---------------- INTERACTION ---------------- */
-canvas.addEventListener("mousemove", e => {
-  const r = canvas.getBoundingClientRect();
-  const x = e.clientX - r.left;
-  const y = e.clientY - r.top;
-  hoveredCavity = cavities.find(c => pointInPoly(x, y, c.shape)) || null;
+/* ---------- INTERACTION ---------- */
+canvas.onmousemove=e=>{
+  const r=canvas.getBoundingClientRect();
+  const x=e.clientX-r.left;
+  const y=e.clientY-r.top;
+  hovered=cavities.find(c=>inside(x,y,c.shape))||null;
   draw();
-});
+};
 
-canvas.addEventListener("click", e => {
-  if (!selectedAsset || !hoveredCavity) return;
-  const r = canvas.getBoundingClientRect();
-  const x = e.clientX - r.left;
-  const y = e.clientY - r.top;
-  const d = Math.hypot(x - hoveredCavity.x, y - hoveredCavity.y);
-  const depth = Math.min(1, d / hoveredCavity.r);
-  placedAssets[hoveredCavity] = { src: selectedAsset, depth };
+canvas.onclick=e=>{
+  if(!selectedAsset||!hovered)return;
+  const r=canvas.getBoundingClientRect();
+  const x=e.clientX-r.left;
+  const y=e.clientY-r.top;
+  const d=Math.hypot(x-hovered.x,y-hovered.y);
+  placedAssets[hovered.id]={src:selectedAsset,depth:Math.min(1,d/hovered.r)};
   draw();
-});
+};
 
-document.querySelectorAll(".asset-item").forEach(item => {
-  item.addEventListener("click", () => {
-    document.querySelectorAll(".asset-item").forEach(i => i.classList.remove("selected"));
-    item.classList.add("selected");
-    selectedAsset = item.dataset.asset;
-  });
-});
+function clearAssets(){
+  placedAssets={};
+  draw();
+}
 
-generateGlyph();
+generate();
 </script>
-
 </body>
 </html>
+
 
 
