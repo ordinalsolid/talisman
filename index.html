@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
 <title>Stone Glyph Art Creator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: system-ui, sans-serif;
   background: linear-gradient(135deg, #667eea, #764ba2);
   min-height: 100vh;
   padding: 20px;
@@ -20,14 +20,14 @@ body {
   margin: auto;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,.35);
 }
 
 .header {
+  padding: 30px;
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  padding: 30px;
   text-align: center;
 }
 
@@ -46,8 +46,20 @@ body {
 
 .control-section {
   background: #f8f9fa;
-  padding: 20px;
+  padding: 16px;
   border-radius: 12px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: #667eea;
+  color: white;
+  font-weight: 600;
 }
 
 .assets-grid {
@@ -65,7 +77,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: grab;
-  transition: 0.2s;
+  transition: .2s;
 }
 
 .asset-item:hover {
@@ -82,17 +94,16 @@ body {
 
 .canvas-container {
   flex: 1;
-  background: #f0f0f0;
-  border-radius: 12px;
+  background: #eee;
   padding: 20px;
+  border-radius: 12px;
   display: flex;
   justify-content: center;
 }
 
 canvas {
   background: #111;
-  border-radius: 10px;
-  border: 2px solid #e2e8f0;
+  border-radius: 12px;
 }
 </style>
 </head>
@@ -101,7 +112,7 @@ canvas {
 <div class="container">
   <div class="header">
     <h1>Stone Glyph Art Creator</h1>
-    <p>Carved stone + embedded spectral geometry</p>
+    <p>Carved stone with embedded spectral geometry</p>
   </div>
 
   <div class="main">
@@ -112,16 +123,16 @@ canvas {
       </div>
 
       <div class="control-section">
-        <h3>Asset Library</h3>
+        <h3>Assets</h3>
         <div class="assets-grid">
           <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0001.png"><img src="Spec_Geo_Assets/speculative_geologies_0001.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_moon.png"><img src="Spec_Geo_Assets/asset_moon.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_sun.png"><img src="Spec_Geo_Assets/asset_sun.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_flower.png"><img src="Spec_Geo_Assets/asset_flower.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_leaf.png"><img src="Spec_Geo_Assets/asset_leaf.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_gem.png"><img src="Spec_Geo_Assets/asset_gem.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_butterfly.png"><img src="Spec_Geo_Assets/asset_butterfly.png"></div>
-          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/asset_wave.png"><img src="Spec_Geo_Assets/asset_wave.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0008b.png"><img src="Spec_Geo_Assets/speculative_geologies_0008b.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0023c.png"><img src="Spec_Geo_Assets/speculative_geologies_0023c.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0047a.png"><img src="Spec_Geo_Assets/speculative_geologies_0047a.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0055d.png"><img src="Spec_Geo_Assets/speculative_geologies_0055d.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0056b.png"><img src="Spec_Geo_Assets/speculative_geologies_0056b.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0058d.png"><img src="Spec_Geo_Assets/speculative_geologies_0058d.png"></div>
+          <div class="asset-item" draggable="true" data-asset="Spec_Geo_Assets/speculative_geologies_0063a.png"><img src="Spec_Geo_Assets/speculative_geologies_0063a.png"></div>
         </div>
       </div>
     </div>
@@ -141,11 +152,12 @@ let windows = [];
 let placedAssets = {};
 let draggedAsset = null;
 
-/* ---------- ASSET CACHE ---------- */
+/* ---------- IMAGE CACHE ---------- */
 const assetCache = {};
 function loadAsset(src) {
   if (assetCache[src]) return assetCache[src];
   const img = new Image();
+  img.onload = draw;
   img.src = src;
   assetCache[src] = img;
   return img;
@@ -155,13 +167,13 @@ function loadAsset(src) {
 const noiseTable = Array.from({length:256},()=>Math.random());
 const noise = (x,y)=>noiseTable[(Math.floor(x)+noiseTable[Math.floor(y)&255])&255];
 
-/* ---------- GEOMETRY ---------- */
-function organicShape(cx,cy,r) {
+/* ---------- SHAPES ---------- */
+function organic(cx,cy,r) {
   const pts=[];
-  const n=30;
+  const n=28;
   for(let i=0;i<n;i++){
     const a=i/n*Math.PI*2;
-    const d=r*(0.6+noise(Math.cos(a)*2,Math.sin(a)*2)*0.6);
+    const d=r*(0.65+noise(Math.cos(a)*2,Math.sin(a)*2)*0.6);
     pts.push({x:cx+Math.cos(a)*d,y:cy+Math.sin(a)*d});
   }
   return pts;
@@ -185,15 +197,20 @@ function pointInPoly(x,y,p){
 
 /* ---------- GENERATE ---------- */
 function generateGlyph(){
-  glyphOutline = organicShape(canvas.width/2,canvas.height/2,380);
+  glyphOutline = organic(canvas.width/2,canvas.height/2,380);
   windows=[];
   placedAssets={};
 
   for(let i=0;i<8;i++){
     const x=120+Math.random()*(canvas.width-240);
-    const y=120+Math.random()*(canvas.height-240);
-    const s=45+Math.random()*35;
-    windows.push({id:i,center:{x,y},size:s,shape:organicShape(x,y,s)});
+    const y=140+Math.random()*(canvas.height-280);
+    const size=45+Math.random()*40;
+    windows.push({
+      id:i,
+      center:{x,y},
+      size,
+      shape:organic(x,y,size)
+    });
   }
   draw();
 }
@@ -202,14 +219,12 @@ function generateGlyph(){
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // background
-  const bg=ctx.createRadialGradient(300,500,0,300,500,700);
+  const bg=ctx.createRadialGradient(300,500,0,300,500,800);
   bg.addColorStop(0,"#222");
   bg.addColorStop(1,"#000");
   ctx.fillStyle=bg;
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // stone
   drawPath(glyphOutline);
   ctx.save();
   ctx.clip();
@@ -217,31 +232,30 @@ function draw(){
   ctx.fill();
   ctx.restore();
 
-  // windows
   windows.forEach(w=>{
     drawPath(w.shape);
     ctx.fillStyle="#050505";
     ctx.fill();
 
     if(placedAssets[w.id]){
-      const img=loadAsset(placedAssets[w.id]);
-      const s=w.size*1.6;
+      const {src, depth} = placedAssets[w.id];
+      const img = loadAsset(src);
+      const baseSize = w.size * 1.6;
+      const seatedSize = baseSize * (1 - depth * 0.25);
 
       ctx.save();
-      ctx.translate(w.center.x,w.center.y);
+      ctx.translate(w.center.x, w.center.y);
 
-      // depth shadow
-      ctx.globalCompositeOperation="multiply";
-      ctx.shadowColor="rgba(0,0,0,0.9)";
-      ctx.shadowBlur=25;
-      ctx.shadowOffsetX=6;
-      ctx.shadowOffsetY=8;
-      ctx.drawImage(img,-s/2,-s/2,s,s);
+      ctx.globalCompositeOperation = "multiply";
+      ctx.shadowColor = "rgba(0,0,0,0.9)";
+      ctx.shadowBlur = 30 * depth;
+      ctx.shadowOffsetX = 6 * depth;
+      ctx.shadowOffsetY = 10 * depth;
+      ctx.drawImage(img,-seatedSize/2,-seatedSize/2,seatedSize,seatedSize);
 
-      // highlight overlay
-      ctx.globalCompositeOperation="overlay";
-      ctx.globalAlpha=0.35;
-      ctx.drawImage(img,-s/2,-s/2,s,s);
+      ctx.globalCompositeOperation = "overlay";
+      ctx.globalAlpha = 0.35 * (1 - depth);
+      ctx.drawImage(img,-seatedSize/2,-seatedSize/2,seatedSize,seatedSize);
 
       ctx.restore();
       ctx.globalCompositeOperation="source-over";
@@ -251,19 +265,30 @@ function draw(){
 }
 
 /* ---------- INTERACTION ---------- */
-document.querySelectorAll(".asset-item").forEach(i=>{
-  i.addEventListener("dragstart",e=>draggedAsset=i.dataset.asset);
+document.querySelectorAll(".asset-item").forEach(item=>{
+  item.addEventListener("dragstart",e=>{
+    draggedAsset = item.dataset.asset;
+    e.dataTransfer.setData("text/plain", draggedAsset);
+  });
 });
 
 canvas.addEventListener("dragover",e=>e.preventDefault());
 
 canvas.addEventListener("drop",e=>{
   e.preventDefault();
+  if(!draggedAsset) return;
+
   const r=canvas.getBoundingClientRect();
   const x=e.clientX-r.left;
   const y=e.clientY-r.top;
+
   const w=windows.find(w=>pointInPoly(x,y,w.shape));
-  if(w) placedAssets[w.id]=draggedAsset;
+  if(!w) return;
+
+  const dist = Math.hypot(x-w.center.x,y-w.center.y);
+  const depth = Math.min(1, dist / w.size);
+
+  placedAssets[w.id] = { src: draggedAsset, depth };
   draw();
 });
 
@@ -273,3 +298,4 @@ generateGlyph();
 </script>
 </body>
 </html>
+
