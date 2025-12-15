@@ -203,19 +203,26 @@ function generate(){
   const count=6+Math.floor(Math.random()*5);
   let id=0;
 
-  while(cavities.length<count){
-    const r=85+Math.random()*55; // ~2x larger
-    const c={
-      id:id++,
-      x:canvas.width/2+(Math.random()-0.5)*280,
-      y:canvas.height/2+(Math.random()-0.5)*420,
-      r
-    };
-    if(cavities.every(o=>dist(c,o)>c.r+o.r+40)){
-      c.shape=organic(c.x,c.y,c.r);
-      cavities.push(c);
-    }
+let attempts = 0;
+const maxAttempts = 500;
+
+while (cavities.length < count && attempts < maxAttempts) {
+  attempts++;
+
+  const r = 85 + Math.random() * 55;
+  const c = {
+    id: id++,
+    x: canvas.width / 2 + (Math.random() - 0.5) * 340,
+    y: canvas.height / 2 + (Math.random() - 0.5) * 520,
+    r
+  };
+
+  if (cavities.every(o => dist(c, o) > c.r + o.r + 40)) {
+    c.shape = organic(c.x, c.y, c.r);
+    cavities.push(c);
   }
+}
+
 
   buildOutline();
   draw();
