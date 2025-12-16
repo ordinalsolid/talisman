@@ -2,52 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Digital Talisman Maker v5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Digital Talisman Maker v6 (Mobile Ready)</title>
   <style>
     :root {
       --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
       --panel-bg: rgba(255, 255, 255, 0.95);
       --accent: #5d6d7e; 
+      --highlight: #8e44ad;
     }
     
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     body {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       background: var(--bg-gradient);
-      min-height: 100vh;
-      padding: 20px;
+      height: 100vh;
+      overflow: hidden; /* Prevent body scroll, handle inside containers */
+      padding: 0;
       color: #333;
-    }
-    
-    .container {
-      max-width: 1600px;
-      margin: 0 auto;
-      background: var(--panel-bg);
-      border-radius: 12px;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-      overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: 95vh;
     }
     
     .header {
       background: #fff;
-      padding: 15px 30px;
+      padding: 15px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid #eee;
+      flex-shrink: 0;
+      z-index: 10;
     }
 
-    .header h1 { font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; color: #333; }
+    .header h1 { font-size: 1.1rem; letter-spacing: 1px; text-transform: uppercase; color: #333; }
+    .header small { font-size: 0.7rem; color: #888; }
     
     .main {
       display: flex;
       flex: 1;
       overflow: hidden;
+      position: relative;
     }
     
     .sidebar {
@@ -59,42 +55,45 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      flex-shrink: 0;
+      z-index: 2;
     }
     
     .control-group {
       background: white;
       padding: 15px;
-      border-radius: 6px;
+      border-radius: 8px;
       border: 1px solid #eee;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
     }
     
     .control-group h3 {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
       color: #888;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       letter-spacing: 0.5px;
+      font-weight: 700;
     }
 
     .text-input {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       border: 1px solid #ccc;
-      border-radius: 4px;
-      font-family: sans-serif;
-      font-size: 0.9rem;
+      border-radius: 6px;
+      font-size: 1rem;
     }
     
     .slider-row { margin-bottom: 15px; }
     .slider-row label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; color: #555;}
-    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    input[type="range"] { width: 100%; accent-color: var(--accent); height: 6px; }
     
     .btn {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       border: none;
-      border-radius: 4px;
-      font-size: 0.85rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
       margin-bottom: 8px;
@@ -103,84 +102,127 @@
     }
     
     .btn-primary { background: #333; color: white; }
-    .btn-primary:hover { background: #000; }
     .btn-secondary { background: #e0e0e0; color: #333; }
     
     .assets-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 8px;
     }
     
     .asset-item {
       aspect-ratio: 1;
       background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      cursor: grab;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 5px;
+      padding: 4px;
+      transition: all 0.2s;
     }
-    .asset-item:hover { border-color: #333; }
+    
     .asset-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+    
+    /* Selection State for Tap-to-Place */
+    .asset-item.selected {
+      border-color: var(--highlight);
+      background: #f4ecf7;
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(142, 68, 173, 0.2);
+    }
     
     .canvas-area {
       flex: 1;
-      background: #e8e8e8;
+      background: #e0e0e0;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
+      overflow: hidden;
+      /* Subtle pattern for workspace */
+      background-image: radial-gradient(#ccc 1px, transparent 1px);
+      background-size: 20px 20px;
     }
     
     canvas {
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      background: transparent;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+
+    /* --- MOBILE RESPONSIVENESS --- */
+    @media (max-width: 900px) {
+      .main {
+        flex-direction: column; /* Stack vertically */
+      }
+      
+      .canvas-area {
+        height: 55vh; /* Canvas on top */
+        flex: none;
+        padding: 20px;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        flex: 1;
+        border-right: none;
+        border-top: 1px solid #ccc;
+        flex-direction: column;
+      }
+      
+      .assets-grid {
+        grid-template-columns: repeat(5, 1fr); /* More items per row on mobile */
+      }
+      
+      .btn { padding: 15px; } /* Larger touch targets */
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Talisman // Lithos Engine v5</h1>
+
+  <div class="header">
+    <h1>SPECULATIVE GEOLOGIES <small>v6</small></h1>
+  </div>
+  
+  <div class="main">
+    <div class="canvas-area">
+      <canvas id="canvas" width="700" height="1000"></canvas>
     </div>
-    
-    <div class="main">
-      <div class="sidebar">
-        
-        <div class="control-group">
-          <h3>Intention</h3>
-          <input type="text" id="intentionInput" class="text-input" placeholder="Enter intention..." maxlength="40">
-        </div>
 
-        <div class="control-group">
-          <h3>Stone Formation</h3>
-          <div class="slider-row">
-            <label>Cavities <span id="val-windows">4</span></label>
-            <input type="range" id="windows" min="1" max="6" value="4">
-          </div>
-          <div class="slider-row">
-            <label>Erosion <span id="val-roughness">0.6</span></label>
-            <input type="range" id="roughness" min="0.1" max="1.0" step="0.1" value="0.6">
-          </div>
-          <button class="btn btn-primary" onclick="generateTalisman()">Forge Stone</button>
-        </div>
-
-        <div class="control-group">
-          <h3>Assets</h3>
-          <div class="assets-grid" id="assetGrid"></div>
-        </div>
-
-        <div class="control-group">
-          <button class="btn btn-secondary" onclick="exportImage()">Download .PNG</button>
-          <button class="btn btn-secondary" onclick="clearAssets()">Clear Items</button>
-        </div>
+    <div class="sidebar">
+      <div class="control-group">
+        <h3>1. Intention</h3>
+        <input type="text" id="intentionInput" class="text-input" placeholder="Type intention here..." maxlength="40">
       </div>
 
-      <div class="canvas-area">
-        <canvas id="canvas" width="700" height="1000"></canvas>
+      <div class="control-group">
+        <h3>2. Formation</h3>
+        <div class="slider-row">
+          <label>Cavities <span id="val-windows">4</span></label>
+          <input type="range" id="windows" min="1" max="6" value="4">
+        </div>
+        <div class="slider-row">
+          <label>Erosion <span id="val-roughness">0.6</span></label>
+          <input type="range" id="roughness" min="0.1" max="1.0" step="0.1" value="0.6">
+        </div>
+        <button class="btn btn-primary" onclick="generateTalisman()">Forge New Stone</button>
+      </div>
+
+      <div class="control-group">
+        <h3>3. Select Sigil</h3>
+        <div style="margin-bottom:8px; font-size: 0.8rem; color:#666;">
+          Tap a sigil below, then tap a hole on the stone.
+        </div>
+        <div class="assets-grid" id="assetGrid"></div>
+      </div>
+
+      <div class="control-group">
+        <button class="btn btn-secondary" onclick="exportImage()">Download Image</button>
+        <button class="btn btn-secondary" onclick="clearAssets()" style="background:#fff; border:1px solid #ccc;">Clear Sigils</button>
       </div>
     </div>
   </div>
@@ -188,7 +230,6 @@
   <script>
     /* ---------------- CONFIGURATION ---------------- */
     
-    // UPDATED ASSETS LIST
     const assetFilenames = [
       'sg_0001.png', 'sg_0008b.png', 'sg_0023c.png', 'sg_0047a.png', 
       'sg_0055d.png', 'sg_0056b.png','sg_0058d.png', 'sg_0063a.png', 
@@ -200,7 +241,6 @@
     ];
     const ASSET_PATH = 'Spec_Geo_Assets/';
 
-    // TEXTURES
     const TEXTURE_COUNT = 10;
     const TEXTURE_PATH = 'Textures/';
 
@@ -217,10 +257,11 @@
       textures: [], 
       activeTextures: [], 
       noiseCache: [],
-      intentionText: ""
+      intentionText: "",
+      selectedAsset: null // For tap-to-place logic
     };
 
-    let draggedAssetKey = null;
+    let draggedAssetKey = null; // Keep drag for desktop users
 
     // --- Noise System ---
     function initNoise() {
@@ -235,43 +276,32 @@
 
     // --- Generation Logic ---
 
-    // 1. Phone Shape
     function generateTalismanShape(width, height, roughness, seedOffset) {
         const points = [];
         const steps = 150; 
         const cx = canvas.width / 2;
-        const cy = canvas.height / 2 - 50; 
+        const cy = canvas.height / 2 - 60; // Shift up slightly
         
         for (let i = 0; i < steps; i++) {
             const t = i / steps;
             const angle = t * Math.PI * 2;
-            
             const sx = Math.cos(angle) * width/2;
             const sy = Math.sin(angle) * height/2;
-            
             let px = cx + Math.max(-width/2, Math.min(width/2, sx * 1.3));
             let py = cy + Math.max(-height/2, Math.min(height/2, sy * 1.3));
-
             const n1 = noise(px * 0.005 + seedOffset, py * 0.005 + seedOffset) - 0.5;
             const erosion = n1 * 80 * roughness;
-            
             const dx = px - cx;
             const dy = py - cy;
             const dist = Math.hypot(dx, dy);
-            
-            points.push({
-                x: px + (dx/dist) * erosion,
-                y: py + (dy/dist) * erosion
-            });
+            points.push({ x: px + (dx/dist) * erosion, y: py + (dy/dist) * erosion });
         }
         return smoothPoints(points, 3);
     }
 
-    // 2. Cavity Logic
     function generateCavityShape(cx, cy, avgSize, roughness, seedOffset) {
       const points = [];
       const steps = 50; 
-      
       const isOval = Math.random() > 0.4;
       const stretchX = isOval ? 0.7 + Math.random() * 0.6 : 1;
       const stretchY = isOval ? 0.7 + Math.random() * 0.6 : 1;
@@ -279,25 +309,17 @@
 
       for (let i = 0; i < steps; i++) {
         const theta = (i / steps) * Math.PI * 2;
-        
         let rx = Math.cos(theta) * avgSize * stretchX;
         let ry = Math.sin(theta) * avgSize * stretchY;
-
         if(isOval) {
             const rotX = rx * Math.cos(rotation) - ry * Math.sin(rotation);
             const rotY = rx * Math.sin(rotation) + ry * Math.cos(rotation);
             rx = rotX; ry = rotY;
         }
-
         const noiseFactor = isOval ? 0.2 : 0.8; 
         const n = noise(Math.cos(theta)*3 + seedOffset, Math.sin(theta)*3 + seedOffset);
-        
         const distortion = 1 + (n - 0.5) * noiseFactor * roughness;
-
-        points.push({
-          x: cx + rx * distortion,
-          y: cy + ry * distortion
-        });
+        points.push({ x: cx + rx * distortion, y: cy + ry * distortion });
       }
       return smoothPoints(points, isOval ? 2 : 1);
     }
@@ -328,6 +350,15 @@
       return inside;
     }
 
+    function getBoundingBox(points) {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        points.forEach(p => {
+            if(p.x < minX) minX = p.x; if(p.y < minY) minY = p.y;
+            if(p.x > maxX) maxX = p.x; if(p.y > maxY) maxY = p.y;
+        });
+        return { width: maxX - minX, height: maxY - minY, cx: minX + (maxX - minX)/2, cy: minY + (maxY - minY)/2 };
+    }
+
     function generateTalisman() {
       initNoise();
       const numCavities = parseInt(document.getElementById('windows').value);
@@ -344,66 +375,37 @@
 
       const phoneWidth = canvas.width * 0.45; 
       const phoneHeight = canvas.height * 0.65; 
-      
       state.talismanOutline = generateTalismanShape(phoneWidth, phoneHeight, roughness, Math.random() * 100);
 
       let attempts = 0;
       const bounds = {
-          minX: canvas.width/2 - phoneWidth*0.4,
-          maxX: canvas.width/2 + phoneWidth*0.4,
-          minY: canvas.height/2 - 50 - phoneHeight*0.4,
-          maxY: canvas.height/2 - 50 + phoneHeight*0.4
+          minX: canvas.width/2 - phoneWidth*0.4, maxX: canvas.width/2 + phoneWidth*0.4,
+          minY: canvas.height/2 - 60 - phoneHeight*0.4, maxY: canvas.height/2 - 60 + phoneHeight*0.4
       };
 
       while (state.cavities.length < numCavities && attempts < 500) {
         attempts++;
         const wx = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
         const wy = bounds.minY + Math.random() * (bounds.maxY - bounds.minY);
-        // Varying sizes
         const wSize = 40 + Math.random() * 60;
 
         if (state.cavities.some(c => Math.hypot(c.x - wx, c.y - wy) < (c.size + wSize) * 1.2)) continue;
 
         let shape = generateCavityShape(wx, wy, wSize, roughness, Math.random()*500);
-        
         let fullyInside = true;
         for(let pt of shape) {
             if(!isInside(pt.x, pt.y, state.talismanOutline)) { fullyInside = false; break; }
         }
-
-        if (fullyInside) {
-          state.cavities.push({ id: Date.now() + attempts, x: wx, y: wy, size: wSize, shape: shape });
-        }
+        if (fullyInside) state.cavities.push({ id: Date.now() + attempts, x: wx, y: wy, size: wSize, shape: shape });
       }
       render();
     }
 
-    // Calculate bounding box of a polygon
-    function getBoundingBox(points) {
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        points.forEach(p => {
-            if(p.x < minX) minX = p.x;
-            if(p.y < minY) minY = p.y;
-            if(p.x > maxX) maxX = p.x;
-            if(p.y > maxY) maxY = p.y;
-        });
-        return {
-            x: minX,
-            y: minY,
-            width: maxX - minX,
-            height: maxY - minY,
-            cx: minX + (maxX - minX)/2,
-            cy: minY + (maxY - minY)/2
-        };
-    }
-
-
     function render() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       if (state.talismanOutline.length === 0) return;
 
-      // 1. Draw Master Stone Mask
+      // 1. Mask & Stone Base
       ctx.save();
       ctx.beginPath();
       const pts = state.talismanOutline;
@@ -412,39 +414,29 @@
       ctx.closePath();
       ctx.clip(); 
 
-      // 2. Base Color
       ctx.fillStyle = '#666'; 
       ctx.fillRect(0,0,canvas.width, canvas.height);
 
-      // 3. Apply Textures
       if(state.activeTextures.length > 0 && state.activeTextures[0]) {
         ctx.globalCompositeOperation = 'multiply';
         ctx.drawImage(state.activeTextures[0], 0, 0, canvas.width, canvas.height);
-        
         if(state.activeTextures[1]) {
             ctx.globalCompositeOperation = 'soft-light';
             ctx.globalAlpha = 0.7;
-            ctx.save();
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
+            ctx.save(); ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
             ctx.drawImage(state.activeTextures[1], 0, 0, canvas.width, canvas.height);
             ctx.restore();
         }
       }
-      ctx.globalAlpha = 1.0;
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1.0; ctx.globalCompositeOperation = 'source-over';
 
-      // 4. Procedural Lighting Overlay
       const grad = ctx.createLinearGradient(0,0,canvas.width, canvas.height);
       grad.addColorStop(0, 'rgba(255,255,255,0.2)'); 
-      grad.addColorStop(0.5, 'rgba(0,0,0,0)'); 
       grad.addColorStop(1, 'rgba(0,0,0,0.4)'); 
-      ctx.fillStyle = grad;
-      ctx.fill();
-
-      // 5. Shadow / Bevel
+      ctx.fillStyle = grad; ctx.fill();
       ctx.restore(); 
       
+      // Shadow under stone
       ctx.save();
       ctx.translate(10, 20);
       ctx.fillStyle = 'rgba(0,0,0,0.4)';
@@ -455,7 +447,7 @@
       ctx.fill();
       ctx.restore();
 
-      // Draw Cavities & Assets
+      // 2. Cavities & Assets
       state.cavities.forEach(cavity => {
         ctx.save();
         ctx.beginPath();
@@ -463,36 +455,26 @@
         for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
         ctx.closePath();
         
-        // Fill Cavity (Dark background)
-        ctx.fillStyle = '#181818';
+        // PURE BLACK CAVITY
+        ctx.fillStyle = '#000000';
         ctx.fill();
         
         // Inner Shadows (Depth)
         ctx.shadowColor = 'black';
         ctx.shadowBlur = 8;
-        ctx.shadowOffsetX = 0; 
-        ctx.shadowOffsetY = 0;
         ctx.strokeStyle = 'rgba(0,0,0,0.8)';
         ctx.lineWidth = 3;
         ctx.stroke();
-
-        // REMOVED THE WHITE RIM STROKE HERE FOR REALISM
-
         ctx.restore();
 
         // Draw Asset
         if (state.placedAssets[cavity.id] && state.images[state.placedAssets[cavity.id]]) {
             const img = state.images[state.placedAssets[cavity.id]];
-            
-            // Calculate cavity bounding box to size asset proportionally
             const bbox = getBoundingBox(cavity.shape);
             
-            // Determine scale: Fit within the cavity bounds with some padding
-            // Use Math.min to fit within the smallest dimension of the cavity
             const scaleX = (bbox.width * 0.75) / img.width;
             const scaleY = (bbox.height * 0.75) / img.height;
             const scale = Math.min(scaleX, scaleY);
-            
             const drawW = img.width * scale;
             const drawH = img.height * scale;
             
@@ -500,58 +482,99 @@
             ctx.beginPath();
             ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
             for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
-            ctx.clip(); // Keep asset inside hole
+            ctx.clip(); 
             
             ctx.globalAlpha = 0.9;
-            // Draw centered in the bounding box of the cavity
             ctx.drawImage(img, bbox.cx - drawW/2, bbox.cy - drawH/2, drawW, drawH);
             
-            // Texture overlay on asset
             ctx.globalCompositeOperation = 'multiply';
             ctx.fillStyle = 'rgba(0,0,0,0.2)';
             ctx.fillRect(bbox.cx - drawW/2, bbox.cy - drawH/2, drawW, drawH);
-            
             ctx.restore();
         }
       });
 
-      // 6. Draw Text (Floating below)
+      // 3. Text
       if(state.intentionText) {
           ctx.font = '14px Helvetica, Arial, sans-serif';
           ctx.fillStyle = '#555'; 
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
           ctx.letterSpacing = '1px';
-          // Position relative to bottom of canvas
           ctx.fillText(state.intentionText.toUpperCase(), canvas.width/2, canvas.height - 80);
       }
     }
 
-    // --- Loading & Init ---
+    // --- Interaction ---
+
+    // Select Asset Helper
+    function selectAsset(filename) {
+        state.selectedAsset = filename;
+        draggedAssetKey = filename; // Sync for drag logic
+        // Update UI
+        document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
+        const active = document.querySelector(`.asset-item[data-id="${filename}"]`);
+        if(active) active.classList.add('selected');
+    }
+
+    // Handle Tap on Canvas
+    function handleCanvasInteraction(e) {
+      e.preventDefault(); // Stop mobile scrolling/zoom on tap
+      const rect = canvas.getBoundingClientRect();
+      
+      // Support both touch and mouse events
+      let clientX, clientY;
+      if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      const x = (clientX - rect.left) * (canvas.width / rect.width);
+      const y = (clientY - rect.top) * (canvas.height / rect.height);
+      
+      const target = state.cavities.find(c => isInside(x, y, c.shape));
+      
+      // If we clicked a hole and have an asset selected
+      if (target && state.selectedAsset) {
+        state.placedAssets[target.id] = state.selectedAsset;
+        render();
+      }
+    }
+
     function loadResources() {
-      // Load Sigils
       const grid = document.getElementById('assetGrid');
       grid.innerHTML = '';
+      
       assetFilenames.forEach(filename => {
         const img = new Image();
         img.src = ASSET_PATH + filename;
         img.onload = () => { state.images[filename] = img; };
-        img.onerror = () => { console.warn('Asset missing:', filename); };
         
         const div = document.createElement('div');
         div.className = 'asset-item';
+        div.dataset.id = filename; // Helper for selection
+        
+        // Desktop Drag Setup
         div.draggable = true;
+        div.addEventListener('dragstart', (e) => {
+          selectAsset(filename); // Auto-select on drag
+          e.dataTransfer.setData('text/plain', filename);
+        });
+
+        // Click/Tap Setup
+        div.addEventListener('click', () => {
+           selectAsset(filename);
+        });
+
         const thumb = document.createElement('img');
         thumb.src = ASSET_PATH + filename;
         div.appendChild(thumb);
-        div.addEventListener('dragstart', (e) => {
-          draggedAssetKey = filename;
-          e.dataTransfer.setData('text/plain', filename);
-        });
         grid.appendChild(div);
       });
 
-      // Load Textures
       let texturesLoaded = 0;
       for(let i=1; i<=TEXTURE_COUNT; i++) {
         const num = i.toString().padStart(2, '0');
@@ -562,22 +585,19 @@
             texturesLoaded++;
             if(texturesLoaded === 2) generateTalisman();
         };
-        img.onerror = () => console.log(`Texture ${num} not found.`);
+        img.onerror = () => {};
       }
     }
 
-    // Interaction
+    // Event Listeners
+    canvas.addEventListener('click', handleCanvasInteraction);
+    canvas.addEventListener('touchstart', handleCanvasInteraction, {passive: false});
+
+    // Desktop Drag Overrides
     canvas.addEventListener('dragover', e => e.preventDefault());
     canvas.addEventListener('drop', e => {
       e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-      const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-      const target = state.cavities.find(c => isInside(x, y, c.shape));
-      if(target) {
-        state.placedAssets[target.id] = draggedAssetKey;
-        render();
-      }
+      handleCanvasInteraction(e); // Reuse the calculation logic
     });
 
     document.getElementById('intentionInput').addEventListener('input', (e) => {
