@@ -3,40 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Digital Talisman Maker v6 (Mobile Ready)</title>
+  <title>Digital Talisman Maker v7</title>
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
-      --panel-bg: rgba(255, 255, 255, 0.95);
-      --accent: #5d6d7e; 
+      /* Darker theme variables */
+      --bg-color: #000000;
+      --sidebar-bg: #f4f4f4;
+      --panel-bg: #fff;
+      --accent: #333; 
       --highlight: #8e44ad;
+      --text-main: #333;
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     body {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      background: var(--bg-gradient);
+      background: var(--bg-color);
       height: 100vh;
-      overflow: hidden; /* Prevent body scroll, handle inside containers */
+      overflow: hidden; 
       padding: 0;
-      color: #333;
+      color: var(--text-main);
       display: flex;
       flex-direction: column;
     }
     
     .header {
-      background: #fff;
+      background: #111;
       padding: 15px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #333;
       flex-shrink: 0;
       z-index: 10;
+      color: #fff;
     }
 
-    .header h1 { font-size: 1.1rem; letter-spacing: 1px; text-transform: uppercase; color: #333; }
+    .header h1 { font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 400;}
     .header small { font-size: 0.7rem; color: #888; }
     
     .main {
@@ -44,27 +48,39 @@
       flex: 1;
       overflow: hidden;
       position: relative;
+      flex-direction: row; /* Default: Sidebar Left, Canvas Right */
     }
     
     .sidebar {
-      width: 320px;
-      background: #f9f9f9;
-      padding: 20px;
+      width: 340px;
+      background: var(--sidebar-bg);
+      padding: 25px;
       overflow-y: auto;
-      border-right: 1px solid #e0e0e0;
+      border-right: 1px solid #333;
       display: flex;
       flex-direction: column;
       gap: 20px;
       flex-shrink: 0;
       z-index: 2;
+      /* Ensure sidebar stays on left for desktop */
+      order: 1;
+    }
+    
+    .explainer-text {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #666;
+      margin-bottom: 10px;
+      border-left: 3px solid #333;
+      padding-left: 10px;
     }
     
     .control-group {
-      background: white;
+      background: var(--panel-bg);
       padding: 15px;
       border-radius: 8px;
-      border: 1px solid #eee;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
     .control-group h3 {
@@ -82,6 +98,7 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 1rem;
+      background: #fafafa;
     }
     
     .slider-row { margin-bottom: 15px; }
@@ -102,6 +119,7 @@
     }
     
     .btn-primary { background: #333; color: white; }
+    .btn-primary:hover { background: #000; }
     .btn-secondary { background: #e0e0e0; color: #333; }
     
     .assets-grid {
@@ -113,8 +131,8 @@
     .asset-item {
       aspect-ratio: 1;
       background: #fff;
-      border: 2px solid #ddd;
-      border-radius: 6px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -125,7 +143,6 @@
     
     .asset-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
     
-    /* Selection State for Tap-to-Place */
     .asset-item.selected {
       border-color: var(--highlight);
       background: #f4ecf7;
@@ -135,19 +152,18 @@
     
     .canvas-area {
       flex: 1;
-      background: #e0e0e0;
+      background: #000000; /* Pure black background as requested */
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow: hidden;
-      /* Subtle pattern for workspace */
-      background-image: radial-gradient(#ccc 1px, transparent 1px);
-      background-size: 20px 20px;
+      order: 2;
     }
     
     canvas {
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      /* Subtle glow to separate stone from void */
+      box-shadow: 0 0 100px rgba(255,255,255,0.05); 
       max-width: 90%;
       max-height: 90%;
       object-fit: contain;
@@ -156,13 +172,15 @@
     /* --- MOBILE RESPONSIVENESS --- */
     @media (max-width: 900px) {
       .main {
-        flex-direction: column; /* Stack vertically */
+        flex-direction: column; 
       }
       
       .canvas-area {
-        height: 55vh; /* Canvas on top */
+        height: 50vh; 
         flex: none;
         padding: 20px;
+        /* On mobile, Canvas goes to top */
+        order: 1; 
       }
       
       .sidebar {
@@ -170,30 +188,31 @@
         height: auto;
         flex: 1;
         border-right: none;
-        border-top: 1px solid #ccc;
-        flex-direction: column;
+        border-top: 1px solid #333;
+        /* On mobile, Sidebar goes to bottom */
+        order: 2; 
       }
       
       .assets-grid {
-        grid-template-columns: repeat(5, 1fr); /* More items per row on mobile */
+        grid-template-columns: repeat(5, 1fr);
       }
-      
-      .btn { padding: 15px; } /* Larger touch targets */
     }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h1>SPECULATIVE GEOLOGIES <small>v6</small></h1>
+    <h1>Lithos Engine <small>v7</small></h1>
   </div>
   
   <div class="main">
-    <div class="canvas-area">
-      <canvas id="canvas" width="700" height="1000"></canvas>
-    </div>
-
+    
     <div class="sidebar">
+      
+      <div class="explainer-text">
+        <strong>How to use:</strong> Set an intention and forge a unique digital stone. Select a sigil from the grid, then tap a cavity on the stone to embed it.
+      </div>
+
       <div class="control-group">
         <h3>1. Intention</h3>
         <input type="text" id="intentionInput" class="text-input" placeholder="Type intention here..." maxlength="40">
@@ -225,6 +244,11 @@
         <button class="btn btn-secondary" onclick="clearAssets()" style="background:#fff; border:1px solid #ccc;">Clear Sigils</button>
       </div>
     </div>
+
+    <div class="canvas-area">
+      <canvas id="canvas" width="700" height="1000"></canvas>
+    </div>
+
   </div>
 
   <script>
@@ -258,10 +282,10 @@
       activeTextures: [], 
       noiseCache: [],
       intentionText: "",
-      selectedAsset: null // For tap-to-place logic
+      selectedAsset: null 
     };
 
-    let draggedAssetKey = null; // Keep drag for desktop users
+    let draggedAssetKey = null; 
 
     // --- Noise System ---
     function initNoise() {
@@ -280,7 +304,7 @@
         const points = [];
         const steps = 150; 
         const cx = canvas.width / 2;
-        const cy = canvas.height / 2 - 60; // Shift up slightly
+        const cy = canvas.height / 2 - 60; 
         
         for (let i = 0; i < steps; i++) {
             const t = i / steps;
@@ -402,7 +426,9 @@
     }
 
     function render() {
+      // Clear entire canvas with transparency first
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
       if (state.talismanOutline.length === 0) return;
 
       // 1. Mask & Stone Base
@@ -414,6 +440,7 @@
       ctx.closePath();
       ctx.clip(); 
 
+      // Fill stone base color
       ctx.fillStyle = '#666'; 
       ctx.fillRect(0,0,canvas.width, canvas.height);
 
@@ -439,7 +466,7 @@
       // Shadow under stone
       ctx.save();
       ctx.translate(10, 20);
-      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.filter = 'blur(15px)';
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
@@ -455,7 +482,7 @@
         for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
         ctx.closePath();
         
-        // PURE BLACK CAVITY
+        // Pure Black Cavity
         ctx.fillStyle = '#000000';
         ctx.fill();
         
@@ -497,7 +524,8 @@
       // 3. Text
       if(state.intentionText) {
           ctx.font = '14px Helvetica, Arial, sans-serif';
-          ctx.fillStyle = '#555'; 
+          // Use a light grey for visibility against black background
+          ctx.fillStyle = '#888'; 
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
           ctx.letterSpacing = '1px';
@@ -507,22 +535,18 @@
 
     // --- Interaction ---
 
-    // Select Asset Helper
     function selectAsset(filename) {
         state.selectedAsset = filename;
-        draggedAssetKey = filename; // Sync for drag logic
-        // Update UI
+        draggedAssetKey = filename; 
         document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
         const active = document.querySelector(`.asset-item[data-id="${filename}"]`);
         if(active) active.classList.add('selected');
     }
 
-    // Handle Tap on Canvas
     function handleCanvasInteraction(e) {
-      e.preventDefault(); // Stop mobile scrolling/zoom on tap
+      e.preventDefault(); 
       const rect = canvas.getBoundingClientRect();
       
-      // Support both touch and mouse events
       let clientX, clientY;
       if (e.changedTouches && e.changedTouches.length > 0) {
         clientX = e.changedTouches[0].clientX;
@@ -537,7 +561,6 @@
       
       const target = state.cavities.find(c => isInside(x, y, c.shape));
       
-      // If we clicked a hole and have an asset selected
       if (target && state.selectedAsset) {
         state.placedAssets[target.id] = state.selectedAsset;
         render();
@@ -555,16 +578,14 @@
         
         const div = document.createElement('div');
         div.className = 'asset-item';
-        div.dataset.id = filename; // Helper for selection
+        div.dataset.id = filename; 
         
-        // Desktop Drag Setup
         div.draggable = true;
         div.addEventListener('dragstart', (e) => {
-          selectAsset(filename); // Auto-select on drag
+          selectAsset(filename); 
           e.dataTransfer.setData('text/plain', filename);
         });
 
-        // Click/Tap Setup
         div.addEventListener('click', () => {
            selectAsset(filename);
         });
@@ -589,15 +610,12 @@
       }
     }
 
-    // Event Listeners
     canvas.addEventListener('click', handleCanvasInteraction);
     canvas.addEventListener('touchstart', handleCanvasInteraction, {passive: false});
-
-    // Desktop Drag Overrides
     canvas.addEventListener('dragover', e => e.preventDefault());
     canvas.addEventListener('drop', e => {
       e.preventDefault();
-      handleCanvasInteraction(e); // Reuse the calculation logic
+      handleCanvasInteraction(e); 
     });
 
     document.getElementById('intentionInput').addEventListener('input', (e) => {
