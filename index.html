@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Talisman Agency v19 (Sigil Tuning)</title>
+  <title>Talisman Agency v20 (Accordion)</title>
   <style>
     :root {
       --bg-color: #000000;
@@ -12,6 +12,7 @@
       --accent: #333; 
       --highlight: #8e44ad;
       --text-main: #333;
+      --border-color: #ddd;
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -50,64 +51,107 @@
       flex-direction: row; 
     }
     
+    /* --- SIDEBAR STYLING --- */
     .sidebar {
       width: 340px;
       background: var(--sidebar-bg);
-      padding: 25px;
-      overflow-y: auto;
       border-right: 1px solid #333;
       display: flex;
       flex-direction: column;
-      gap: 20px;
       flex-shrink: 0;
       z-index: 2;
       order: 1;
+      height: 100%;
     }
     
-    .explainer-text {
-      font-size: 0.85rem;
-      line-height: 1.5;
-      color: #666;
-      margin-bottom: 10px;
-      border-left: 3px solid #333;
-      padding-left: 10px;
-    }
-    
-    .control-group {
-      background: var(--panel-bg);
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      transition: opacity 0.2s;
-    }
-    
-    .control-group.disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-    
-    .control-group h3 {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      color: #888;
-      margin-bottom: 12px;
-      letter-spacing: 0.5px;
-      font-weight: 700;
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
     }
 
+    /* Accordion Styles */
+    .accordion-item {
+      border-bottom: 1px solid var(--border-color);
+      background: #fff;
+    }
+
+    .accordion-header {
+      width: 100%;
+      text-align: left;
+      background: #fff;
+      padding: 20px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+      text-transform: uppercase;
+    }
+
+    .accordion-header:hover {
+      background: #f9f9f9;
+    }
+
+    .accordion-header::after {
+      content: '+';
+      font-size: 1.2rem;
+      font-weight: 300;
+      color: #888;
+    }
+
+    .accordion-item.active .accordion-header::after {
+      content: '-';
+    }
+    
+    .accordion-item.active .accordion-header {
+      background: #f0f0f0;
+      color: #000;
+    }
+
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      background: #fafafa;
+    }
+    
+    .accordion-inner {
+      padding: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    /* Disabled Accordion State (Calibration) */
+    .accordion-item.disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    /* Footer Controls */
+    .sidebar-footer {
+      padding: 20px;
+      background: #fff;
+      border-top: 1px solid #ddd;
+    }
+
+    /* --- FORM ELEMENTS --- */
     .text-input {
       width: 100%;
       padding: 12px;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 1rem;
-      background: #fafafa;
+      background: #fff;
     }
     
     .slider-row { margin-bottom: 15px; }
     .slider-row label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; color: #555;}
-    input[type="range"] { width: 100%; accent-color: var(--accent); height: 6px; }
+    input[type="range"] { width: 100%; accent-color: var(--accent); height: 6px; cursor: pointer; }
     
     .btn {
       width: 100%;
@@ -117,15 +161,14 @@
       font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
-      margin-bottom: 8px;
       text-transform: uppercase;
       transition: all 0.2s;
       text-align: center;
     }
     
-    .btn-primary { background: #333; color: white; }
+    .btn-primary { background: #333; color: white; margin-top: 10px; }
     .btn-primary:hover { background: #000; }
-    .btn-secondary { background: #e0e0e0; color: #333; }
+    .btn-secondary { background: #e0e0e0; color: #333; margin-bottom: 10px;}
     
     .upload-btn-wrapper {
       position: relative;
@@ -166,17 +209,7 @@
     }
     
     .asset-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-    
-    .asset-item.custom::after {
-      content: '•';
-      position: absolute;
-      top: 2px;
-      right: 4px;
-      color: var(--highlight);
-      font-size: 1.2rem;
-      line-height: 0.5;
-    }
-
+    .asset-item.custom::after { content: '•'; position: absolute; top: 2px; right: 4px; color: var(--highlight); font-size: 1.2rem; line-height: 0.5; }
     .asset-item.selected {
       border-color: var(--highlight);
       background: #f4ecf7;
@@ -184,6 +217,7 @@
       box-shadow: 0 4px 8px rgba(142, 68, 173, 0.2);
     }
     
+    /* --- CANVAS --- */
     .canvas-area {
       flex: 1;
       background: #000000; 
@@ -214,60 +248,84 @@
 <body>
 
   <div class="header">
-    <h1>Talisman Agency <small>v19</small></h1>
+    <h1>Talisman Agency <small>v20</small></h1>
   </div>
   
   <div class="main">
     
     <div class="sidebar">
-      <div class="explainer-text">
-        <strong>How to use:</strong> 1. Select a sigil. 2. Tap a cavity to place it. 3. Tap the filled cavity again to unlock the rotation and scale sliders below.
+      
+      <div class="sidebar-content">
+        <div class="accordion-item" id="acc-intention">
+          <button class="accordion-header" onclick="toggleAccordion('acc-intention')">I. Intention</button>
+          <div class="accordion-body">
+            <div class="accordion-inner">
+               <div style="font-size:0.8rem; color:#666; margin-bottom:10px;">
+                 Set an intention for your talisman. This will be etched at the base of the stone.
+               </div>
+               <input type="text" id="intentionInput" class="text-input" placeholder="Type intention here..." maxlength="40">
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item" id="acc-formation">
+          <button class="accordion-header" onclick="toggleAccordion('acc-formation')">II. Formation</button>
+          <div class="accordion-body">
+            <div class="accordion-inner">
+              <div class="slider-row">
+                <label>Cavities <span id="val-windows">4</span></label>
+                <input type="range" id="windows" min="1" max="8" value="4">
+              </div>
+              <div class="slider-row">
+                <label>Erosion <span id="val-roughness">0.6</span></label>
+                <input type="range" id="roughness" min="0.1" max="1.0" step="0.1" value="0.6">
+              </div>
+              <button class="btn btn-primary" onclick="generateTalisman()">Forge New Talisman</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item" id="acc-selection">
+          <button class="accordion-header" onclick="toggleAccordion('acc-selection')">III. Selection</button>
+          <div class="accordion-body">
+            <div class="accordion-inner">
+              <div class="upload-btn-wrapper">
+                <button class="btn btn-secondary" style="margin-bottom:0; font-size:0.8rem;">+ Upload Custom Sigil</button>
+                <input type="file" id="fileUpload" accept="image/png, image/jpeg, image/gif" onchange="handleFileUpload(event)" />
+              </div>
+              <div style="margin-bottom:8px; font-size: 0.8rem; color:#666;">
+                1. Select a sigil below.<br>2. Tap a cavity on the stone.
+              </div>
+              <div class="assets-grid" id="assetGrid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item disabled" id="acc-calibration">
+          <button class="accordion-header" onclick="toggleAccordion('acc-calibration')">IV. Calibration</button>
+          <div class="accordion-body">
+            <div class="accordion-inner">
+               <div style="font-size:0.8rem; color:#666; margin-bottom:15px;">
+                 Adjust the selected sigil.
+               </div>
+              <div class="slider-row">
+                <label>Rotate <span id="val-sigilRot">0°</span></label>
+                <input type="range" id="sigilRot" min="-180" max="180" value="0">
+              </div>
+              <div class="slider-row">
+                <label>Scale <span id="val-sigilScale">1.0</span></label>
+                <input type="range" id="sigilScale" min="0.2" max="3.0" step="0.1" value="1.0">
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="control-group">
-        <h3>1. Intention</h3>
-        <input type="text" id="intentionInput" class="text-input" placeholder="Type intention here..." maxlength="40">
-      </div>
-
-      <div class="control-group">
-        <h3>2. Formation</h3>
-        <div class="slider-row">
-          <label>Cavities <span id="val-windows">4</span></label>
-          <input type="range" id="windows" min="1" max="8" value="4">
-        </div>
-        <div class="slider-row">
-          <label>Erosion <span id="val-roughness">0.6</span></label>
-          <input type="range" id="roughness" min="0.1" max="1.0" step="0.1" value="0.6">
-        </div>
-        <button class="btn btn-primary" onclick="generateTalisman()">Forge New Talisman</button>
-      </div>
-
-      <div class="control-group">
-        <h3>3. Select Sigil</h3>
-        
-        <div class="upload-btn-wrapper">
-          <button class="btn btn-secondary" style="margin-bottom:0;">+ Upload Custom Sigil</button>
-          <input type="file" id="fileUpload" accept="image/png, image/jpeg, image/gif" onchange="handleFileUpload(event)" />
-        </div>
-        <div class="assets-grid" id="assetGrid"></div>
-      </div>
-
-      <div class="control-group disabled" id="tuningControls">
-        <h3>4. Tune Sigil</h3>
-        <div class="slider-row">
-          <label>Rotate <span id="val-sigilRot">0°</span></label>
-          <input type="range" id="sigilRot" min="-180" max="180" value="0">
-        </div>
-        <div class="slider-row">
-          <label>Scale <span id="val-sigilScale">1.0</span></label>
-          <input type="range" id="sigilScale" min="0.2" max="3.0" step="0.1" value="1.0">
-        </div>
-      </div>
-
-      <div class="control-group">
+      <div class="sidebar-footer">
         <button class="btn btn-secondary" onclick="exportImage()">Download Talisman</button>
-        <button class="btn btn-secondary" onclick="clearAssets()" style="background:#fff; border:1px solid #ccc;">Clear Sigils</button>
+        <button class="btn btn-secondary" onclick="clearAssets()" style="background:#fff; border:1px solid #ccc; margin-bottom:0;">Clear Sigils</button>
       </div>
+
     </div>
 
     <div class="canvas-area">
@@ -277,6 +335,35 @@
   </div>
 
   <script>
+    /* ---------------- ACCORDION LOGIC ---------------- */
+    function toggleAccordion(id) {
+      const item = document.getElementById(id);
+      if (item.classList.contains('disabled')) return;
+
+      const body = item.querySelector('.accordion-body');
+      const isActive = item.classList.contains('active');
+      
+      // Optional: Close others? 
+      // Uncomment lines below if you want only one open at a time
+      // document.querySelectorAll('.accordion-item').forEach(el => {
+      //   el.classList.remove('active');
+      //   el.querySelector('.accordion-body').style.maxHeight = null;
+      // });
+
+      if (!isActive) {
+        item.classList.add('active');
+        body.style.maxHeight = body.scrollHeight + "px";
+      } else {
+        item.classList.remove('active');
+        body.style.maxHeight = null;
+      }
+    }
+
+    function openAccordion(id) {
+        const item = document.getElementById(id);
+        if(!item.classList.contains('active')) toggleAccordion(id);
+    }
+
     /* ---------------- CONFIGURATION ---------------- */
     
     const assetFilenames = [
@@ -301,7 +388,6 @@
     let state = {
       talismanOutline: [],
       cavities: [], 
-      // Changed to object structure: id -> { key, rot, scale }
       placedAssets: {}, 
       images: {}, 
       customAssetsData: [], 
@@ -310,7 +396,7 @@
       noiseCache: [],
       intentionText: "",
       selectedAssetKey: null,
-      activeCavityId: null // The cavity currently being tuned
+      activeCavityId: null 
     };
 
     let draggedAssetKey = null; 
@@ -332,7 +418,6 @@
         const steps = 150; 
         const cx = canvas.width / 2;
         const cy = canvas.height / 2 - 40; 
-        
         const freq = 0.005; 
         
         for (let i = 0; i < steps; i++) {
@@ -340,13 +425,10 @@
             const angle = t * Math.PI * 2;
             const sx = Math.cos(angle) * width/2;
             const sy = Math.sin(angle) * height/2;
-            
             let px = cx + Math.max(-width/2, Math.min(width/2, sx * 1.3));
             let py = cy + Math.max(-height/2, Math.min(height/2, sy * 1.3));
-            
             const n1 = noise(px * freq + seedOffset, py * freq + seedOffset) - 0.5;
             const erosion = n1 * 80 * roughness;
-
             const dx = px - cx;
             const dy = py - cy;
             const dist = Math.hypot(dx, dy);
@@ -466,8 +548,7 @@
 
       while (state.cavities.length < numCavities && attempts < 10000) {
         attempts++;
-        let baseMin = 45; 
-        let baseMax = 95;
+        let baseMin = 45; let baseMax = 95;
         if (attempts > 2000) { baseMin = 35; baseMax = 70; }
         if (attempts > 5000) { baseMin = 25; baseMax = 50; }
         const wSize = baseMin + Math.random() * (baseMax - baseMin);
@@ -489,12 +570,10 @@
 
     function render() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
       if (state.talismanOutline.length === 0) return;
-
       const pts = state.talismanOutline;
 
-      // 1. Shadow
+      // Shadow
       ctx.save();
       ctx.translate(10, 20);
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -502,19 +581,16 @@
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
       for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-      ctx.closePath();
       ctx.fill();
       ctx.restore();
 
-      // 2. Body
+      // Body & Texture
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
       for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-      ctx.closePath();
       ctx.clip(); 
-      ctx.fillStyle = '#666'; 
-      ctx.fillRect(0,0,canvas.width, canvas.height);
+      ctx.fillStyle = '#666'; ctx.fillRect(0,0,canvas.width, canvas.height);
       if(state.activeTextures.length > 0 && state.activeTextures[0]) {
         ctx.globalCompositeOperation = 'multiply';
         ctx.drawImage(state.activeTextures[0], 0, 0, canvas.width, canvas.height);
@@ -528,7 +604,7 @@
       }
       ctx.globalAlpha = 1.0; 
       
-      // Lighting
+      // Gradient Lighting
       ctx.globalCompositeOperation = 'overlay';
       const bbox = getBoundingBox(pts);
       const grad = ctx.createRadialGradient(
@@ -542,80 +618,66 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.restore(); 
 
-      // 3. Stroke
+      // Stroke
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
       for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-      ctx.closePath();
       ctx.strokeStyle = 'rgba(0,0,0,0.5)';
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.restore();
 
-      // 4. Cavities
+      // Cavities
       state.cavities.forEach(cavity => {
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
         for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
         ctx.closePath();
-        
         ctx.fillStyle = '#000000';
         ctx.fill();
         ctx.strokeStyle = 'rgba(255,255,255,0.1)';
         ctx.lineWidth = 1;
         ctx.stroke();
-
-        // Highlight Active Cavity
+        
+        // Active Selection Highlight
         if (state.activeCavityId === cavity.id) {
             ctx.lineWidth = 3;
-            ctx.strokeStyle = '#8e44ad'; // Purple highlight
+            ctx.strokeStyle = '#8e44ad';
             ctx.stroke();
         }
-
         ctx.restore();
 
-        // Placed Assets with Rotation & Scale
+        // Assets
         const assetData = state.placedAssets[cavity.id];
         if (assetData && state.images[assetData.key]) {
             const img = state.images[assetData.key];
             const bbox = getBoundingBox(cavity.shape);
-            
-            // Base fit scale
             const fitScaleX = (bbox.width * 0.75) / img.width;
             const fitScaleY = (bbox.height * 0.75) / img.height;
             const baseScale = Math.min(fitScaleX, fitScaleY);
-            
-            // Apply User Modifiers
             const finalScale = baseScale * assetData.scale;
             const drawW = img.width * finalScale;
             const drawH = img.height * finalScale;
             
             ctx.save();
-            // Clip to cavity shape
             ctx.beginPath();
             ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
             for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
             ctx.clip(); 
-            
-            // Move to center, rotate, scale
             ctx.translate(bbox.cx, bbox.cy);
             ctx.rotate(assetData.rot * Math.PI / 180);
-            
             ctx.globalAlpha = 0.9;
             ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
-            
-            // Darken
             ctx.globalCompositeOperation = 'multiply';
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.fillRect(-drawW/2, -drawH/2, drawW, drawH);
-            
             ctx.restore();
         }
       });
 
-      // 5. Text
+      // Text
       if(state.intentionText) {
           ctx.font = '14px Helvetica, Arial, sans-serif';
           ctx.fillStyle = '#888'; 
@@ -654,25 +716,28 @@
         try { localStorage.setItem(LS_KEY, JSON.stringify(state.customAssetsData)); } catch (e) {}
     }
 
-    // --- Tuning Logic ---
     function updateTuningUI() {
-        const group = document.getElementById('tuningControls');
+        const accItem = document.getElementById('acc-calibration');
         const rotSlider = document.getElementById('sigilRot');
         const scaleSlider = document.getElementById('sigilScale');
         
         if (state.activeCavityId && state.placedAssets[state.activeCavityId]) {
-            group.classList.remove('disabled');
+            accItem.classList.remove('disabled');
             const data = state.placedAssets[state.activeCavityId];
             rotSlider.value = data.rot;
             scaleSlider.value = data.scale;
             document.getElementById('val-sigilRot').textContent = data.rot + '°';
             document.getElementById('val-sigilScale').textContent = data.scale;
+            
+            // Auto open Calibration if we just selected something
+            openAccordion('acc-calibration');
         } else {
-            group.classList.add('disabled');
+            accItem.classList.add('disabled');
+            // If it was open, close it
+            if(accItem.classList.contains('active')) toggleAccordion('acc-calibration');
         }
     }
 
-    // Listeners for sliders
     document.getElementById('sigilRot').addEventListener('input', (e) => {
         if(state.activeCavityId && state.placedAssets[state.activeCavityId]) {
             state.placedAssets[state.activeCavityId].rot = parseInt(e.target.value);
@@ -689,19 +754,11 @@
         }
     });
 
-
     function handleCanvasInteraction(e) {
       e.preventDefault(); 
       const rect = canvas.getBoundingClientRect();
-      
-      let clientX, clientY;
-      if (e.changedTouches && e.changedTouches.length > 0) {
-        clientX = e.changedTouches[0].clientX;
-        clientY = e.changedTouches[0].clientY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
+      let clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+      let clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
 
       const x = (clientX - rect.left) * (canvas.width / rect.width);
       const y = (clientY - rect.top) * (canvas.height / rect.height);
@@ -709,29 +766,20 @@
       const target = state.cavities.find(c => isInside(x, y, c.shape));
       
       if (target) {
-          // If we have a selected asset, place it
           if (state.selectedAssetKey) {
-              // Place new or replace existing
-              state.placedAssets[target.id] = { 
-                  key: state.selectedAssetKey, 
-                  rot: 0, 
-                  scale: 1.0 
-              };
-              state.selectedAssetKey = null; // consume selection
+              state.placedAssets[target.id] = { key: state.selectedAssetKey, rot: 0, scale: 1.0 };
+              state.selectedAssetKey = null; 
               document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
-              
-              state.activeCavityId = target.id; // Select for tuning immediately
+              state.activeCavityId = target.id; 
               updateTuningUI();
               render();
           } 
-          // If no asset selected, just select the cavity (if it has something)
           else if (state.placedAssets[target.id]) {
               state.activeCavityId = target.id;
               updateTuningUI();
               render();
           }
       } else {
-          // Clicked background -> deselect cavity
           state.activeCavityId = null;
           updateTuningUI();
           render();
@@ -747,15 +795,12 @@
             if(isCustom) selectAsset(id);
             render(); 
         };
-
         const div = document.createElement('div');
         div.className = 'asset-item' + (isCustom ? ' custom' : '');
         div.dataset.id = id;
-        div.draggable = true;
         const thumb = document.createElement('img');
         thumb.src = src;
         div.appendChild(thumb);
-
         div.addEventListener('click', () => { selectAsset(id); });
         if(isCustom && grid.firstChild) grid.insertBefore(div, grid.firstChild);
         else grid.appendChild(div);
@@ -766,14 +811,9 @@
       grid.innerHTML = '';
       try {
         const saved = localStorage.getItem(LS_KEY);
-        if (saved) {
-            state.customAssetsData = JSON.parse(saved);
-            state.customAssetsData.forEach(asset => loadSingleAsset(asset.id, asset.src, true));
-        }
+        if (saved) JSON.parse(saved).forEach(asset => loadSingleAsset(asset.id, asset.src, true));
       } catch (e) {}
-
       assetFilenames.forEach(filename => loadSingleAsset(filename, ASSET_PATH + filename, false));
-
       let texturesLoaded = 0;
       for(let i=1; i<=TEXTURE_COUNT; i++) {
         const num = i.toString().padStart(2, '0');
@@ -790,16 +830,9 @@
 
     canvas.addEventListener('click', handleCanvasInteraction);
     canvas.addEventListener('touchstart', handleCanvasInteraction, {passive: false});
-    canvas.addEventListener('dragover', e => e.preventDefault());
-    canvas.addEventListener('drop', e => { e.preventDefault(); handleCanvasInteraction(e); });
-
-    document.getElementById('intentionInput').addEventListener('input', (e) => {
-        state.intentionText = e.target.value;
-        render();
-    });
-
+    document.getElementById('intentionInput').addEventListener('input', (e) => { state.intentionText = e.target.value; render(); });
     document.querySelectorAll('input[type=range]').forEach(el => {
-      if(el.id === 'sigilRot' || el.id === 'sigilScale') return; // Handled separately
+      if(el.id === 'sigilRot' || el.id === 'sigilScale') return; 
       el.addEventListener('input', (e) => {
         document.getElementById('val-' + e.target.id).textContent = e.target.value;
         generateTalisman();
@@ -808,17 +841,13 @@
 
     function clearAssets() { state.placedAssets = {}; state.activeCavityId = null; updateTuningUI(); render(); }
     function exportImage() {
-        // Temporarily clear active selection ring for screenshot
         const temp = state.activeCavityId;
         state.activeCavityId = null; 
         render();
-        
         const link = document.createElement('a');
         link.download = `Talisman.png`;
         link.href = canvas.toDataURL();
         link.click();
-        
-        // Restore
         state.activeCavityId = temp;
         render();
     }
