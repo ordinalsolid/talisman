@@ -245,5 +245,615 @@
     }
   </style>
 </head>
+<body>
 
+  <div class="header">
+    <h1>Talisman Agency <small>v20</small></h1>
+  </div>
+  
+  <div class="main">
+    
+    <div class="sidebar">
+      
+      <div class="sidebar-content">
+        <div class="accordion-item" id="acc-intention">
+          <button class="accordion-header" onclick="toggleAccordion('acc-intention')">I. Intention</button>
+          <div class="accordion-body">
+            <div class="accordion-inner">
+               <div style="font-size:0.8rem; color:#666; margin-bottom:10px;">
+                 Set an intention for your talisman. This will be etched at the base of the stone.
+               </div>
+               <input type="text" id="intentionInput" class="text-input" placeholder="Type intention here..." maxlength="40">
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item" id="acc-formation">
+          <button class="accordion-header" onclick="toggleAccordion('acc-formation')">II. Formation</button>
+          <div class="accordion-body">
+            <div class="accordion-inner">
+              <div class="slider-row">
+                <label>Cavities <span id="val-windows">4</span></label>
+                <input type="range" id="windows" min="1" max="8" value="4">
+              </div>
+              <div class="slider-row">
+                <label>Erosion <span id="val-roughness">0.6</span></label>
+                <input type="range" id="roughness" min="0.1" max="1.0" step="0.1" value="0.6">
+              </div>
+              <button class="btn btn-primary" onclick="generateTalisman()">Forge New Talisman</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item" id="acc-selection">
+          <button class="accordion-header" onclick="toggleAccordion('acc-selection')">III. Selection</button>
+          <div class="accordion-body">
+            <div class="accordion-inner">
+              <div class="upload-btn-wrapper">
+                <button class="btn btn-secondary" style="margin-bottom:0; font-size:0.8rem;">+ Upload Custom Sigil</button>
+                <input type="file" id="fileUpload" accept="image/png, image/jpeg, image/gif" onchange="handleFileUpload(event)" />
+              </div>
+              <div style="margin-bottom:8px; font-size: 0.8rem; color:#666;">
+                1. Select a sigil below.<br>2. Tap a cavity on the stone.
+              </div>
+              <div class="assets-grid" id="assetGrid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item disabled" id="acc-calibration">
+          <button class="accordion-header" onclick="toggleAccordion('acc-calibration')">IV. Calibration</button>
+          <div class="accordion-body">
+            <div class="accordion-inner">
+               <div style="font-size:0.8rem; color:#666; margin-bottom:15px;">
+                 Adjust the selected sigil.
+               </div>
+              <div class="slider-row">
+                <label>Rotate <span id="val-sigilRot">0°</span></label>
+                <input type="range" id="sigilRot" min="-180" max="180" value="0">
+              </div>
+              <div class="slider-row">
+                <label>Scale <span id="val-sigilScale">1.0</span></label>
+                <input type="range" id="sigilScale" min="0.2" max="3.0" step="0.1" value="1.0">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-secondary" onclick="exportImage()">Download Talisman</button>
+        <button class="btn btn-secondary" onclick="clearAssets()" style="background:#fff; border:1px solid #ccc; margin-bottom:0;">Clear Sigils</button>
+      </div>
+
+    </div>
+
+    <div class="canvas-area">
+      <canvas id="canvas" width="700" height="1000"></canvas>
+    </div>
+
+  </div>
+
+  <script>
+    /* ---------------- ACCORDION LOGIC ---------------- */
+    function toggleAccordion(id) {
+      const item = document.getElementById(id);
+      if (item.classList.contains('disabled')) return;
+
+      const body = item.querySelector('.accordion-body');
+      const isActive = item.classList.contains('active');
+      
+      // Optional: Close others? 
+      // Uncomment lines below if you want only one open at a time
+      // document.querySelectorAll('.accordion-item').forEach(el => {
+      //   el.classList.remove('active');
+      //   el.querySelector('.accordion-body').style.maxHeight = null;
+      // });
+
+      if (!isActive) {
+        item.classList.add('active');
+        body.style.maxHeight = body.scrollHeight + "px";
+      } else {
+        item.classList.remove('active');
+        body.style.maxHeight = null;
+      }
+    }
+
+    function openAccordion(id) {
+        const item = document.getElementById(id);
+        if(!item.classList.contains('active')) toggleAccordion(id);
+    }
+
+    /* ---------------- CONFIGURATION ---------------- */
+    
+    const assetFilenames = [
+      'sg_0001.png', 'sg_0008b.png', 'sg_0023c.png', 'sg_0047a.png', 
+      'sg_0055d.png', 'sg_0056b.png','sg_0058d.png', 'sg_0063a.png', 
+      'sg_0067.png', 'sg_0070.png','sg_0072.png', 'sg_0078a.png', 
+      'sg_0078f.png', 'sg_0080b.png', 'sg_0080c.png', 'sg_0085a.png', 
+      'sg_0085b.png', 'sg_0086a.png','sg_0096a.png', 'sg_0096b.png', 
+      'sg_0096h.png', 'sg_0097b.png','sg_0104c.png', 'sg_0104g.png', 
+      'sg_0148.png', 'sg_0191.png'
+    ];
+    const ASSET_PATH = 'Spec_Geo_Assets/';
+    const TEXTURE_COUNT = 10;
+    const TEXTURE_PATH = 'Textures/';
+    const LS_KEY = 'talisman_custom_assets_v1';
+
+    /* ---------------- STATE ---------------- */
+    
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    
+    let state = {
+      talismanOutline: [],
+      cavities: [], 
+      placedAssets: {}, 
+      images: {}, 
+      customAssetsData: [], 
+      textures: [], 
+      activeTextures: [], 
+      noiseCache: [],
+      intentionText: "",
+      selectedAssetKey: null,
+      activeCavityId: null 
+    };
+
+    let draggedAssetKey = null; 
+
+    function initNoise() {
+      state.noiseCache = new Float32Array(1024);
+      for(let i=0; i<1024; i++) state.noiseCache[i] = Math.random();
+    }
+    function noise(x, y) {
+      const X = Math.floor(Math.abs(x)) & 1023;
+      const Y = Math.floor(Math.abs(y)) & 1023;
+      return state.noiseCache[X + state.noiseCache[Y] * 1023 & 1023]; 
+    }
+
+    // --- Generation Logic ---
+
+    function generateTalismanShape(width, height, roughness, seedOffset) {
+        const points = [];
+        const steps = 150; 
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2 - 40; 
+        const freq = 0.005; 
+        
+        for (let i = 0; i < steps; i++) {
+            const t = i / steps;
+            const angle = t * Math.PI * 2;
+            const sx = Math.cos(angle) * width/2;
+            const sy = Math.sin(angle) * height/2;
+            let px = cx + Math.max(-width/2, Math.min(width/2, sx * 1.3));
+            let py = cy + Math.max(-height/2, Math.min(height/2, sy * 1.3));
+            const n1 = noise(px * freq + seedOffset, py * freq + seedOffset) - 0.5;
+            const erosion = n1 * 80 * roughness;
+            const dx = px - cx;
+            const dy = py - cy;
+            const dist = Math.hypot(dx, dy);
+            points.push({ x: px + (dx/dist) * erosion, y: py + (dy/dist) * erosion });
+        }
+        return smoothPoints(points, 3);
+    }
+
+    function generateCavityShape(cx, cy, avgSize, roughness, seedOffset) {
+      const points = [];
+      const steps = 50; 
+      const isOval = Math.random() > 0.4;
+      const stretchX = isOval ? 0.7 + Math.random() * 0.6 : 1;
+      const stretchY = isOval ? 0.7 + Math.random() * 0.6 : 1;
+      const rotation = Math.random() * Math.PI;
+
+      for (let i = 0; i < steps; i++) {
+        const theta = (i / steps) * Math.PI * 2;
+        let rx = Math.cos(theta) * avgSize * stretchX;
+        let ry = Math.sin(theta) * avgSize * stretchY;
+        if(isOval) {
+            const rotX = rx * Math.cos(rotation) - ry * Math.sin(rotation);
+            const rotY = rx * Math.sin(rotation) + ry * Math.cos(rotation);
+            rx = rotX; ry = rotY;
+        }
+        const noiseFactor = isOval ? 0.2 : 0.8; 
+        const n = noise(Math.cos(theta)*3 + seedOffset, Math.sin(theta)*3 + seedOffset);
+        const distortion = 1 + (n - 0.5) * noiseFactor * roughness;
+        points.push({ x: cx + rx * distortion, y: cy + ry * distortion });
+      }
+      return smoothPoints(points, isOval ? 2 : 1);
+    }
+
+    function smoothPoints(points, iterations=1) {
+      let current = points;
+      for(let k=0; k<iterations; k++) {
+        const next = [];
+        for (let i = 0; i < current.length; i++) {
+          const prev = current[(i - 1 + current.length) % current.length];
+          const pt = current[i];
+          const nxt = current[(i + 1) % current.length];
+          next.push({ x: (prev.x + pt.x + nxt.x) / 3, y: (prev.y + pt.y + nxt.y) / 3 });
+        }
+        current = next;
+      }
+      return current;
+    }
+
+    function isInside(x, y, poly) {
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i].x, yi = poly[i].y;
+        const xj = poly[j].x, yj = poly[j].y;
+        const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function distanceToPolyEdge(x, y, poly) {
+        let minDist = Infinity;
+        for (let i = 0; i < poly.length; i++) {
+            const j = (i + 1) % poly.length;
+            const p1 = poly[i]; const p2 = poly[j];
+            let A = x - p1.x; let B = y - p1.y;
+            let C = p2.x - p1.x; let D = p2.y - p1.y;
+            let dot = A * C + B * D;
+            let len_sq = C * C + D * D;
+            let param = -1;
+            if (len_sq != 0) param = dot / len_sq;
+            let xx, yy;
+            if (param < 0) { xx = p1.x; yy = p1.y; }
+            else if (param > 1) { xx = p2.x; yy = p2.y; }
+            else { xx = p1.x + param * C; yy = p1.y + param * D; }
+            let dx = x - xx; let dy = y - yy;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            if(dist < minDist) minDist = dist;
+        }
+        return minDist;
+    }
+
+    function getBoundingBox(points) {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        points.forEach(p => {
+            if(p.x < minX) minX = p.x; if(p.y < minY) minY = p.y;
+            if(p.x > maxX) maxX = p.x; if(p.y > maxY) maxY = p.y;
+        });
+        return { width: maxX - minX, height: maxY - minY, cx: minX + (maxX - minX)/2, cy: minY + (maxY - minY)/2 };
+    }
+
+    function generateTalisman() {
+      initNoise();
+      const numCavities = parseInt(document.getElementById('windows').value);
+      const roughness = parseFloat(document.getElementById('roughness').value);
+      
+      state.cavities = [];
+      state.placedAssets = {}; 
+      state.activeCavityId = null;
+      updateTuningUI();
+
+      if(state.textures.length > 0) {
+        const t1 = Math.floor(Math.random() * state.textures.length);
+        let t2 = Math.floor(Math.random() * state.textures.length);
+        state.activeTextures = [state.textures[t1], state.textures[t2]];
+      }
+
+      const phoneWidth = canvas.width * 0.58; 
+      const phoneHeight = canvas.height * 0.85; 
+      
+      state.talismanOutline = generateTalismanShape(phoneWidth, phoneHeight, roughness, Math.random() * 100);
+
+      let attempts = 0;
+      const bounds = {
+          minX: canvas.width/2 - phoneWidth*0.33, maxX: canvas.width/2 + phoneWidth*0.33,
+          minY: canvas.height/2 - 60 - phoneHeight*0.33, maxY: canvas.height/2 - 60 + phoneHeight*0.33
+      };
+
+      while (state.cavities.length < numCavities && attempts < 10000) {
+        attempts++;
+        let baseMin = 45; let baseMax = 95;
+        if (attempts > 2000) { baseMin = 35; baseMax = 70; }
+        if (attempts > 5000) { baseMin = 25; baseMax = 50; }
+        const wSize = baseMin + Math.random() * (baseMax - baseMin);
+        const wx = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
+        const wy = bounds.minY + Math.random() * (bounds.maxY - bounds.minY);
+        if (state.cavities.some(c => Math.hypot(c.x - wx, c.y - wy) < (c.size + wSize) * 1.15)) continue;
+        let shape = generateCavityShape(wx, wy, wSize, roughness, Math.random()*500);
+        let safe = true;
+        for(let pt of shape) {
+            if(!isInside(pt.x, pt.y, state.talismanOutline)) { safe = false; break; }
+            if(distanceToPolyEdge(pt.x, pt.y, state.talismanOutline) < 15) { safe = false; break; }
+        }
+        if (safe) {
+            state.cavities.push({ id: Date.now() + attempts, x: wx, y: wy, size: wSize, shape: shape });
+        }
+      }
+      render();
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (state.talismanOutline.length === 0) return;
+      const pts = state.talismanOutline;
+
+      // Shadow
+      ctx.save();
+      ctx.translate(10, 20);
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.filter = 'blur(15px)';
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.fill();
+      ctx.restore();
+
+      // Body & Texture
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.clip(); 
+      ctx.fillStyle = '#666'; ctx.fillRect(0,0,canvas.width, canvas.height);
+      if(state.activeTextures.length > 0 && state.activeTextures[0]) {
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.drawImage(state.activeTextures[0], 0, 0, canvas.width, canvas.height);
+        if(state.activeTextures[1]) {
+            ctx.globalCompositeOperation = 'soft-light';
+            ctx.globalAlpha = 0.8;
+            ctx.save(); ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
+            ctx.drawImage(state.activeTextures[1], 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+        }
+      }
+      ctx.globalAlpha = 1.0; 
+      
+      // Gradient Lighting
+      ctx.globalCompositeOperation = 'overlay';
+      const bbox = getBoundingBox(pts);
+      const grad = ctx.createRadialGradient(
+          bbox.cx - bbox.width*0.2, bbox.cy - bbox.height*0.2, 50,
+          bbox.cx, bbox.cy, bbox.height * 0.8
+      );
+      grad.addColorStop(0, 'rgba(255, 255, 255, 0.4)'); 
+      grad.addColorStop(0.5, 'rgba(128, 128, 128, 0.0)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0.6)');      
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.restore(); 
+
+      // Stroke
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+
+      // Cavities
+      state.cavities.forEach(cavity => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
+        for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
+        ctx.closePath();
+        ctx.fillStyle = '#000000';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        // Active Selection Highlight
+        if (state.activeCavityId === cavity.id) {
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#8e44ad';
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        // Assets
+        const assetData = state.placedAssets[cavity.id];
+        if (assetData && state.images[assetData.key]) {
+            const img = state.images[assetData.key];
+            const bbox = getBoundingBox(cavity.shape);
+            const fitScaleX = (bbox.width * 0.75) / img.width;
+            const fitScaleY = (bbox.height * 0.75) / img.height;
+            const baseScale = Math.min(fitScaleX, fitScaleY);
+            const finalScale = baseScale * assetData.scale;
+            const drawW = img.width * finalScale;
+            const drawH = img.height * finalScale;
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
+            for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
+            ctx.clip(); 
+            ctx.translate(bbox.cx, bbox.cy);
+            ctx.rotate(assetData.rot * Math.PI / 180);
+            ctx.globalAlpha = 0.9;
+            ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+            ctx.globalCompositeOperation = 'multiply';
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(-drawW/2, -drawH/2, drawW, drawH);
+            ctx.restore();
+        }
+      });
+
+      // Text
+      if(state.intentionText) {
+          ctx.font = '14px Helvetica, Arial, sans-serif';
+          ctx.fillStyle = '#888'; 
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom'; 
+          ctx.letterSpacing = '1px';
+          ctx.fillText(state.intentionText.toUpperCase(), canvas.width/2, canvas.height - 30);
+      }
+    }
+
+    // --- Interaction ---
+
+    function selectAsset(filename) {
+        state.selectedAssetKey = filename;
+        draggedAssetKey = filename; 
+        document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
+        const active = document.querySelector(`.asset-item[data-id="${filename}"]`);
+        if(active) active.classList.add('selected');
+    }
+
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const customId = 'custom_' + Date.now();
+        saveCustomAsset(customId, e.target.result);
+        loadSingleAsset(customId, e.target.result, true); 
+      };
+      reader.readAsDataURL(file);
+      event.target.value = ''; 
+    }
+
+    function saveCustomAsset(id, dataUrl) {
+        state.customAssetsData.push({ id: id, src: dataUrl });
+        try { localStorage.setItem(LS_KEY, JSON.stringify(state.customAssetsData)); } catch (e) {}
+    }
+
+    function updateTuningUI() {
+        const accItem = document.getElementById('acc-calibration');
+        const rotSlider = document.getElementById('sigilRot');
+        const scaleSlider = document.getElementById('sigilScale');
+        
+        if (state.activeCavityId && state.placedAssets[state.activeCavityId]) {
+            accItem.classList.remove('disabled');
+            const data = state.placedAssets[state.activeCavityId];
+            rotSlider.value = data.rot;
+            scaleSlider.value = data.scale;
+            document.getElementById('val-sigilRot').textContent = data.rot + '°';
+            document.getElementById('val-sigilScale').textContent = data.scale;
+            
+            // Auto open Calibration if we just selected something
+            openAccordion('acc-calibration');
+        } else {
+            accItem.classList.add('disabled');
+            // If it was open, close it
+            if(accItem.classList.contains('active')) toggleAccordion('acc-calibration');
+        }
+    }
+
+    document.getElementById('sigilRot').addEventListener('input', (e) => {
+        if(state.activeCavityId && state.placedAssets[state.activeCavityId]) {
+            state.placedAssets[state.activeCavityId].rot = parseInt(e.target.value);
+            document.getElementById('val-sigilRot').textContent = e.target.value + '°';
+            render();
+        }
+    });
+
+    document.getElementById('sigilScale').addEventListener('input', (e) => {
+        if(state.activeCavityId && state.placedAssets[state.activeCavityId]) {
+            state.placedAssets[state.activeCavityId].scale = parseFloat(e.target.value);
+            document.getElementById('val-sigilScale').textContent = e.target.value;
+            render();
+        }
+    });
+
+    function handleCanvasInteraction(e) {
+      e.preventDefault(); 
+      const rect = canvas.getBoundingClientRect();
+      let clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+      let clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+
+      const x = (clientX - rect.left) * (canvas.width / rect.width);
+      const y = (clientY - rect.top) * (canvas.height / rect.height);
+      
+      const target = state.cavities.find(c => isInside(x, y, c.shape));
+      
+      if (target) {
+          if (state.selectedAssetKey) {
+              state.placedAssets[target.id] = { key: state.selectedAssetKey, rot: 0, scale: 1.0 };
+              state.selectedAssetKey = null; 
+              document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
+              state.activeCavityId = target.id; 
+              updateTuningUI();
+              render();
+          } 
+          else if (state.placedAssets[target.id]) {
+              state.activeCavityId = target.id;
+              updateTuningUI();
+              render();
+          }
+      } else {
+          state.activeCavityId = null;
+          updateTuningUI();
+          render();
+      }
+    }
+
+    function loadSingleAsset(id, src, isCustom = false) {
+        const grid = document.getElementById('assetGrid');
+        const img = new Image();
+        img.src = src;
+        img.onload = () => { 
+            state.images[id] = img;
+            if(isCustom) selectAsset(id);
+            render(); 
+        };
+        const div = document.createElement('div');
+        div.className = 'asset-item' + (isCustom ? ' custom' : '');
+        div.dataset.id = id;
+        const thumb = document.createElement('img');
+        thumb.src = src;
+        div.appendChild(thumb);
+        div.addEventListener('click', () => { selectAsset(id); });
+        if(isCustom && grid.firstChild) grid.insertBefore(div, grid.firstChild);
+        else grid.appendChild(div);
+    }
+
+    function loadResources() {
+      const grid = document.getElementById('assetGrid');
+      grid.innerHTML = '';
+      try {
+        const saved = localStorage.getItem(LS_KEY);
+        if (saved) JSON.parse(saved).forEach(asset => loadSingleAsset(asset.id, asset.src, true));
+      } catch (e) {}
+      assetFilenames.forEach(filename => loadSingleAsset(filename, ASSET_PATH + filename, false));
+      let texturesLoaded = 0;
+      for(let i=1; i<=TEXTURE_COUNT; i++) {
+        const num = i.toString().padStart(2, '0');
+        const img = new Image();
+        img.src = `${TEXTURE_PATH}texture${num}.png`;
+        img.onload = () => {
+            state.textures.push(img);
+            texturesLoaded++;
+            if(texturesLoaded === 2) generateTalisman();
+        };
+        img.onerror = () => {};
+      }
+    }
+
+    canvas.addEventListener('click', handleCanvasInteraction);
+    canvas.addEventListener('touchstart', handleCanvasInteraction, {passive: false});
+    document.getElementById('intentionInput').addEventListener('input', (e) => { state.intentionText = e.target.value; render(); });
+    document.querySelectorAll('input[type=range]').forEach(el => {
+      if(el.id === 'sigilRot' || el.id === 'sigilScale') return; 
+      el.addEventListener('input', (e) => {
+        document.getElementById('val-' + e.target.id).textContent = e.target.value;
+        generateTalisman();
+      })
+    });
+
+    function clearAssets() { state.placedAssets = {}; state.activeCavityId = null; updateTuningUI(); render(); }
+    function exportImage() {
+        const temp = state.activeCavityId;
+        state.activeCavityId = null; 
+        render();
+        const link = document.createElement('a');
+        link.download = `Talisman.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        state.activeCavityId = temp;
+        render();
+    }
+
+    loadResources();
+    setTimeout(() => { if(state.talismanOutline.length === 0) generateTalisman(); }, 1500);
+  </script>
+</body>
 </html>
