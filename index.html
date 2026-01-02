@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Talisman Agency v20 (Accordion)</title>
+  <title>Talisman Agency v23 (Aura)</title>
   <style>
     :root {
       --bg-color: #000000;
       --sidebar-bg: #f4f4f4;
-      --panel-bg: #fff;
       --accent: #333; 
       --highlight: #8e44ad;
       --text-main: #333;
@@ -26,7 +25,27 @@
       color: var(--text-main);
       display: flex;
       flex-direction: column;
+      cursor: none; /* Hide default cursor to show glow better */
     }
+    
+    /* --- CUSTOM CURSOR GLOW --- */
+    #cursor-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(142, 68, 173, 0.6) 0%, rgba(142, 68, 173, 0) 70%);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.1s ease, height 0.1s ease, opacity 0.2s ease;
+      mix-blend-mode: screen; /* Makes it look like light */
+    }
+
+    /* Fallback for cursor visibility if JS fails or on white bg */
+    body:hover #cursor-glow { opacity: 1; }
     
     .header {
       background: #111;
@@ -67,9 +86,9 @@
     .sidebar-content {
       flex: 1;
       overflow-y: auto;
+      cursor: default; /* Restore cursor pointer for UI */
     }
 
-    /* Accordion Styles */
     .accordion-item {
       border-bottom: 1px solid var(--border-color);
       background: #fff;
@@ -94,25 +113,10 @@
       text-transform: uppercase;
     }
 
-    .accordion-header:hover {
-      background: #f9f9f9;
-    }
-
-    .accordion-header::after {
-      content: '+';
-      font-size: 1.2rem;
-      font-weight: 300;
-      color: #888;
-    }
-
-    .accordion-item.active .accordion-header::after {
-      content: '-';
-    }
-    
-    .accordion-item.active .accordion-header {
-      background: #f0f0f0;
-      color: #000;
-    }
+    .accordion-header:hover { background: #f9f9f9; }
+    .accordion-header::after { content: '+'; font-size: 1.2rem; font-weight: 300; color: #888; }
+    .accordion-item.active .accordion-header::after { content: '-'; }
+    .accordion-item.active .accordion-header { background: #f0f0f0; color: #000; }
 
     .accordion-body {
       max-height: 0;
@@ -121,22 +125,17 @@
       background: #fafafa;
     }
     
-    .accordion-inner {
-      padding: 20px;
-      border-top: 1px solid #eee;
-    }
+    .accordion-inner { padding: 20px; border-top: 1px solid #eee; }
+    .accordion-item.disabled { pointer-events: none; opacity: 0.5; }
 
-    /* Disabled Accordion State (Calibration) */
-    .accordion-item.disabled {
-      pointer-events: none;
-      opacity: 0.5;
-    }
-
-    /* Footer Controls */
     .sidebar-footer {
       padding: 20px;
       background: #fff;
       border-top: 1px solid #ddd;
+      font-size: 0.75rem;
+      color: #999;
+      line-height: 1.4;
+      text-align: justify;
     }
 
     /* --- FORM ELEMENTS --- */
@@ -227,12 +226,14 @@
       position: relative;
       overflow: hidden;
       order: 2;
-      padding: 10px; 
+      padding: 0; 
+      cursor: none; /* Hide cursor on canvas */
     }
     
     canvas {
       box-shadow: 0 0 100px rgba(255,255,255,0.05); 
-      max-height: 98%; 
+      height: 96%; 
+      width: auto;
       max-width: 98%;
       object-fit: contain;
     }
@@ -240,15 +241,23 @@
     @media (max-width: 900px) {
       .main { flex-direction: column; }
       .canvas-area { height: 55vh; flex: none; padding: 10px; order: 1; }
+      canvas { height: auto; width: auto; max-height: 98%; max-width: 98%; }
       .sidebar { width: 100%; height: auto; flex: 1; border-right: none; border-top: 1px solid #333; order: 2; }
       .assets-grid { grid-template-columns: repeat(5, 1fr); }
+      
+      /* On mobile, standard cursor management */
+      body { cursor: auto; }
+      .canvas-area { cursor: auto; }
+      #cursor-glow { opacity: 0; } /* Hidden by default on mobile until touch */
     }
   </style>
 </head>
 <body>
 
+  <div id="cursor-glow"></div>
+
   <div class="header">
-    <h1>Talisman Agency <small>v20</small></h1>
+    <h1>Talisman Agency <small>v23</small></h1>
   </div>
   
   <div class="main">
@@ -274,13 +283,13 @@
             <div class="accordion-inner">
               <div class="slider-row">
                 <label>Cavities <span id="val-windows">4</span></label>
-                <input type="range" id="windows" min="1" max="8" value="4">
+                <input type="range" id="windows" min="1" max="8" value="4" oninput="updateVal('windows', this.value); generateFullTalisman()">
               </div>
               <div class="slider-row">
-                <label>Erosion <span id="val-roughness">0.6</span></label>
-                <input type="range" id="roughness" min="0.1" max="1.0" step="0.1" value="0.6">
+                <label>Erosion <span id="val-roughness">0.0</span></label>
+                <input type="range" id="roughness" min="0.0" max="1.0" step="0.01" value="0.0" oninput="updateVal('roughness', this.value); updateContourOnly()">
               </div>
-              <button class="btn btn-primary" onclick="generateTalisman()">Forge New Talisman</button>
+              <button class="btn btn-primary" onclick="generateFullTalisman()">Reform Talisman</button>
             </div>
           </div>
         </div>
@@ -319,37 +328,84 @@
             </div>
           </div>
         </div>
+
+        <div class="accordion-item" id="acc-exportation">
+          <button class="accordion-header" onclick="toggleAccordion('acc-exportation')">V. Exportation</button>
+          <div class="accordion-body">
+            <div class="accordion-inner">
+              <button class="btn btn-secondary" onclick="exportImage()">Download Talisman</button>
+              <button class="btn btn-secondary" onclick="clearAssets()" style="background:#fff; border:1px solid #ccc; margin-bottom:0;">Clear Sigils</button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div class="sidebar-footer">
-        <button class="btn btn-secondary" onclick="exportImage()">Download Talisman</button>
-        <button class="btn btn-secondary" onclick="clearAssets()" style="background:#fff; border:1px solid #ccc; margin-bottom:0;">Clear Sigils</button>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+        </p>
       </div>
 
     </div>
 
     <div class="canvas-area">
-      <canvas id="canvas" width="700" height="1000"></canvas>
+      <canvas id="canvas" width="900" height="1500"></canvas>
     </div>
 
   </div>
 
   <script>
-    /* ---------------- ACCORDION LOGIC ---------------- */
+    /* ---------------- CURSOR GLOW ---------------- */
+    const cursorGlow = document.getElementById('cursor-glow');
+    let isTouch = false;
+
+    // Desktop: Mouse Move
+    document.addEventListener('mousemove', (e) => {
+      if(isTouch) return;
+      cursorGlow.style.opacity = '1';
+      // Center the 60px circle on the mouse
+      cursorGlow.style.left = e.clientX + 'px';
+      cursorGlow.style.top = e.clientY + 'px';
+      cursorGlow.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+
+    document.addEventListener('mouseout', () => {
+      if(!isTouch) cursorGlow.style.opacity = '0';
+    });
+
+    // Mobile: Touch with Pressure
+    document.addEventListener('touchstart', handleTouch, {passive: false});
+    document.addEventListener('touchmove', handleTouch, {passive: false});
+    document.addEventListener('touchend', () => {
+      cursorGlow.style.opacity = '0';
+    });
+
+    function handleTouch(e) {
+      isTouch = true;
+      const touch = e.touches[0];
+      if(!touch) return;
+
+      cursorGlow.style.opacity = '1';
+      cursorGlow.style.left = touch.clientX + 'px';
+      cursorGlow.style.top = touch.clientY + 'px';
+
+      // Pressure handling
+      let force = touch.force || 0.5; // Default if not supported
+      if(force === 0) force = 0.5;
+      
+      // Map force (usually 0 to 1) to scale (1.0 to 2.5)
+      const scale = 1 + (force * 2.5);
+      
+      cursorGlow.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    }
+
+    /* ---------------- UI UTILS ---------------- */
     function toggleAccordion(id) {
       const item = document.getElementById(id);
       if (item.classList.contains('disabled')) return;
-
       const body = item.querySelector('.accordion-body');
       const isActive = item.classList.contains('active');
-      
-      // Optional: Close others? 
-      // Uncomment lines below if you want only one open at a time
-      // document.querySelectorAll('.accordion-item').forEach(el => {
-      //   el.classList.remove('active');
-      //   el.querySelector('.accordion-body').style.maxHeight = null;
-      // });
-
       if (!isActive) {
         item.classList.add('active');
         body.style.maxHeight = body.scrollHeight + "px";
@@ -364,8 +420,11 @@
         if(!item.classList.contains('active')) toggleAccordion(id);
     }
 
-    /* ---------------- CONFIGURATION ---------------- */
-    
+    function updateVal(id, val) {
+        document.getElementById('val-'+id).textContent = val;
+    }
+
+    /* ---------------- ASSETS ---------------- */
     const assetFilenames = [
       'sg_0001.png', 'sg_0008b.png', 'sg_0023c.png', 'sg_0047a.png', 
       'sg_0055d.png', 'sg_0056b.png','sg_0058d.png', 'sg_0063a.png', 
@@ -378,10 +437,9 @@
     const ASSET_PATH = 'Spec_Geo_Assets/';
     const TEXTURE_COUNT = 10;
     const TEXTURE_PATH = 'Textures/';
-    const LS_KEY = 'talisman_custom_assets_v1';
+    const LS_KEY = 'talisman_custom_assets_v2';
 
     /* ---------------- STATE ---------------- */
-    
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     
@@ -396,71 +454,25 @@
       noiseCache: [],
       intentionText: "",
       selectedAssetKey: null,
-      activeCavityId: null 
+      activeCavityId: null,
+      contourSeed: 0
     };
 
-    let draggedAssetKey = null; 
-
     function initNoise() {
-      state.noiseCache = new Float32Array(1024);
-      for(let i=0; i<1024; i++) state.noiseCache[i] = Math.random();
+      state.noiseCache = new Float32Array(2048);
+      for(let i=0; i<2048; i++) state.noiseCache[i] = Math.random();
     }
-    function noise(x, y) {
-      const X = Math.floor(Math.abs(x)) & 1023;
-      const Y = Math.floor(Math.abs(y)) & 1023;
-      return state.noiseCache[X + state.noiseCache[Y] * 1023 & 1023]; 
-    }
-
-    // --- Generation Logic ---
-
-    function generateTalismanShape(width, height, roughness, seedOffset) {
-        const points = [];
-        const steps = 150; 
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2 - 40; 
-        const freq = 0.005; 
-        
-        for (let i = 0; i < steps; i++) {
-            const t = i / steps;
-            const angle = t * Math.PI * 2;
-            const sx = Math.cos(angle) * width/2;
-            const sy = Math.sin(angle) * height/2;
-            let px = cx + Math.max(-width/2, Math.min(width/2, sx * 1.3));
-            let py = cy + Math.max(-height/2, Math.min(height/2, sy * 1.3));
-            const n1 = noise(px * freq + seedOffset, py * freq + seedOffset) - 0.5;
-            const erosion = n1 * 80 * roughness;
-            const dx = px - cx;
-            const dy = py - cy;
-            const dist = Math.hypot(dx, dy);
-            points.push({ x: px + (dx/dist) * erosion, y: py + (dy/dist) * erosion });
-        }
-        return smoothPoints(points, 3);
+    
+    function noise(x) {
+      const i = Math.floor(x);
+      const f = x - i;
+      const w = f * f * (3 - 2 * f);
+      const idx = i & 2047;
+      const idx2 = (i+1) & 2047;
+      return state.noiseCache[idx] * (1 - w) + state.noiseCache[idx2] * w;
     }
 
-    function generateCavityShape(cx, cy, avgSize, roughness, seedOffset) {
-      const points = [];
-      const steps = 50; 
-      const isOval = Math.random() > 0.4;
-      const stretchX = isOval ? 0.7 + Math.random() * 0.6 : 1;
-      const stretchY = isOval ? 0.7 + Math.random() * 0.6 : 1;
-      const rotation = Math.random() * Math.PI;
-
-      for (let i = 0; i < steps; i++) {
-        const theta = (i / steps) * Math.PI * 2;
-        let rx = Math.cos(theta) * avgSize * stretchX;
-        let ry = Math.sin(theta) * avgSize * stretchY;
-        if(isOval) {
-            const rotX = rx * Math.cos(rotation) - ry * Math.sin(rotation);
-            const rotY = rx * Math.sin(rotation) + ry * Math.cos(rotation);
-            rx = rotX; ry = rotY;
-        }
-        const noiseFactor = isOval ? 0.2 : 0.8; 
-        const n = noise(Math.cos(theta)*3 + seedOffset, Math.sin(theta)*3 + seedOffset);
-        const distortion = 1 + (n - 0.5) * noiseFactor * roughness;
-        points.push({ x: cx + rx * distortion, y: cy + ry * distortion });
-      }
-      return smoothPoints(points, isOval ? 2 : 1);
-    }
+    /* ---------------- GEOMETRY & MATH ---------------- */
 
     function smoothPoints(points, iterations=1) {
       let current = points;
@@ -488,28 +500,6 @@
       return inside;
     }
 
-    function distanceToPolyEdge(x, y, poly) {
-        let minDist = Infinity;
-        for (let i = 0; i < poly.length; i++) {
-            const j = (i + 1) % poly.length;
-            const p1 = poly[i]; const p2 = poly[j];
-            let A = x - p1.x; let B = y - p1.y;
-            let C = p2.x - p1.x; let D = p2.y - p1.y;
-            let dot = A * C + B * D;
-            let len_sq = C * C + D * D;
-            let param = -1;
-            if (len_sq != 0) param = dot / len_sq;
-            let xx, yy;
-            if (param < 0) { xx = p1.x; yy = p1.y; }
-            else if (param > 1) { xx = p2.x; yy = p2.y; }
-            else { xx = p1.x + param * C; yy = p1.y + param * D; }
-            let dx = x - xx; let dy = y - yy;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            if(dist < minDist) minDist = dist;
-        }
-        return minDist;
-    }
-
     function getBoundingBox(points) {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         points.forEach(p => {
@@ -519,145 +509,287 @@
         return { width: maxX - minX, height: maxY - minY, cx: minX + (maxX - minX)/2, cy: minY + (maxY - minY)/2 };
     }
 
-    function generateTalisman() {
-      initNoise();
-      const numCavities = parseInt(document.getElementById('windows').value);
-      const roughness = parseFloat(document.getElementById('roughness').value);
-      
-      state.cavities = [];
-      state.placedAssets = {}; 
-      state.activeCavityId = null;
-      updateTuningUI();
+    /* ---------------- GENERATION LOGIC ---------------- */
 
-      if(state.textures.length > 0) {
-        const t1 = Math.floor(Math.random() * state.textures.length);
-        let t2 = Math.floor(Math.random() * state.textures.length);
-        state.activeTextures = [state.textures[t1], state.textures[t2]];
-      }
+    function generateCavityShape(cx, cy, avgSize, seedOffset) {
+      const points = [];
+      const steps = 40; 
+      const isOval = Math.random() > 0.4;
+      const stretchX = isOval ? 0.7 + Math.random() * 0.5 : 1;
+      const stretchY = isOval ? 0.7 + Math.random() * 0.5 : 1;
+      const rotation = Math.random() * Math.PI;
 
-      const phoneWidth = canvas.width * 0.58; 
-      const phoneHeight = canvas.height * 0.85; 
-      
-      state.talismanOutline = generateTalismanShape(phoneWidth, phoneHeight, roughness, Math.random() * 100);
-
-      let attempts = 0;
-      const bounds = {
-          minX: canvas.width/2 - phoneWidth*0.33, maxX: canvas.width/2 + phoneWidth*0.33,
-          minY: canvas.height/2 - 60 - phoneHeight*0.33, maxY: canvas.height/2 - 60 + phoneHeight*0.33
-      };
-
-      while (state.cavities.length < numCavities && attempts < 10000) {
-        attempts++;
-        let baseMin = 45; let baseMax = 95;
-        if (attempts > 2000) { baseMin = 35; baseMax = 70; }
-        if (attempts > 5000) { baseMin = 25; baseMax = 50; }
-        const wSize = baseMin + Math.random() * (baseMax - baseMin);
-        const wx = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
-        const wy = bounds.minY + Math.random() * (bounds.maxY - bounds.minY);
-        if (state.cavities.some(c => Math.hypot(c.x - wx, c.y - wy) < (c.size + wSize) * 1.15)) continue;
-        let shape = generateCavityShape(wx, wy, wSize, roughness, Math.random()*500);
-        let safe = true;
-        for(let pt of shape) {
-            if(!isInside(pt.x, pt.y, state.talismanOutline)) { safe = false; break; }
-            if(distanceToPolyEdge(pt.x, pt.y, state.talismanOutline) < 15) { safe = false; break; }
+      for (let i = 0; i < steps; i++) {
+        const theta = (i / steps) * Math.PI * 2;
+        let rx = Math.cos(theta) * avgSize * stretchX;
+        let ry = Math.sin(theta) * avgSize * stretchY;
+        
+        if(isOval) {
+            const rotX = rx * Math.cos(rotation) - ry * Math.sin(rotation);
+            const rotY = rx * Math.sin(rotation) + ry * Math.cos(rotation);
+            rx = rotX; ry = rotY;
         }
-        if (safe) {
-            state.cavities.push({ id: Date.now() + attempts, x: wx, y: wy, size: wSize, shape: shape });
-        }
+
+        const n = noise(i * 0.5 + seedOffset);
+        const distortion = 0.8 + (n * 0.4); 
+        points.push({ x: cx + rx * distortion, y: cy + ry * distortion });
       }
-      render();
+      return smoothPoints(points, 2);
     }
+
+    // Polar equation for rounded rectangle (Superellipse)
+    function getPhoneRadius(angle, w, h) {
+        const n = 4.5; 
+        const a = w/2;
+        const b = h/2;
+        const cosT = Math.abs(Math.cos(angle));
+        const sinT = Math.abs(Math.sin(angle));
+        const r = Math.pow( Math.pow(cosT/a, n) + Math.pow(sinT/b, n), -1/n );
+        return r;
+    }
+
+    function getMaxCavityReach(cx, cy, angle) {
+        let maxR = 0;
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+        
+        state.cavities.forEach(cavity => {
+            cavity.shape.forEach(pt => {
+                const dx = pt.x - cx;
+                const dy = pt.y - cy;
+                const proj = dx * cosA + dy * sinA;
+                const ptAngle = Math.atan2(dy, dx);
+                let diff = Math.abs(ptAngle - angle);
+                if(diff > Math.PI) diff = Math.PI*2 - diff;
+                if (diff < Math.PI / 3) { 
+                     if (proj > maxR) maxR = proj;
+                }
+            });
+        });
+        return maxR;
+    }
+
+    function updateContourOnly() {
+        const erosion = parseFloat(document.getElementById('roughness').value);
+        
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        
+        const margin = 60;
+        const phoneHeight = canvas.height - (margin * 2);
+        const phoneWidth = phoneHeight * 0.56; 
+        
+        // HARD SAFETY LIMIT: The stone edge must never be closer than this to a hole
+        const absoluteMinEdgeDistance = 25; 
+        // Breathing room for the "tightest" erosion setting
+        const erosionPadding = 40; 
+
+        const minCoreSize = 100;
+        
+        const points = [];
+        const steps = 240;
+
+        for (let i = 0; i < steps; i++) {
+            const angle = (i / steps) * Math.PI * 2;
+            
+            // 1. Outer Boundary (Quirkier "Found Rock" Shape)
+            let maxR = getPhoneRadius(angle, phoneWidth, phoneHeight);
+            const baseShapeNoise = noise(i * 0.02 + state.contourSeed * 0.5) - 0.5;
+            maxR += baseShapeNoise * (maxR * 0.25);
+
+            // 2. Inner Boundaries
+            const cavityReach = getMaxCavityReach(cx, cy, angle);
+            
+            let erosionTargetR = cavityReach + erosionPadding;
+            erosionTargetR = Math.max(erosionTargetR, minCoreSize);
+
+            const absoluteHardLimitR = cavityReach + absoluteMinEdgeDistance;
+            
+            if (maxR < erosionTargetR + 20) maxR = erosionTargetR + 20;
+
+            // 3. Interpolation
+            let finalR = maxR * (1 - erosion) + erosionTargetR * erosion;
+            
+            // 4. Surface Noise
+            const noiseScale = 10 + (erosion * 30); 
+            const nVal = noise(i * 0.15 + state.contourSeed) - 0.5; 
+            finalR += nVal * noiseScale;
+
+            // 5. FINAL HARD SAFETY CHECK
+            if (finalR < absoluteHardLimitR) finalR = absoluteHardLimitR;
+
+            points.push({
+                x: cx + Math.cos(angle) * finalR,
+                y: cy + Math.sin(angle) * finalR
+            });
+        }
+        
+        state.talismanOutline = smoothPoints(points, 3);
+        render();
+    }
+
+    function generateFullTalisman() {
+        initNoise();
+        const numCavities = parseInt(document.getElementById('windows').value);
+        
+        state.cavities = [];
+        state.placedAssets = {}; 
+        state.activeCavityId = null;
+        state.contourSeed = Math.random() * 100; 
+        updateTuningUI();
+
+        if(state.textures.length > 0) {
+            const t1 = Math.floor(Math.random() * state.textures.length);
+            let t2 = Math.floor(Math.random() * state.textures.length);
+            state.activeTextures = [state.textures[t1], state.textures[t2]];
+        }
+
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        
+        const spawnH = (canvas.height * 0.85) * 0.80; 
+        const spawnW = (spawnH * 0.56) * 0.70; 
+        
+        const sizeFactor = Math.max(60, 260 - (numCavities * 22)); 
+
+        for(let i=0; i<numCavities; i++) {
+            let placed = false;
+            let attempts = 0;
+            let currentSize = sizeFactor + (Math.random() * 40 - 20); 
+            
+            while(!placed) {
+                attempts++;
+                if (attempts > 50) currentSize *= 0.98;
+                if (attempts > 200) currentSize *= 0.98; 
+                if (currentSize < 20) currentSize = 20; 
+
+                const wx = (cx - spawnW/2) + Math.random() * spawnW;
+                const wy = (cy - spawnH/2) + Math.random() * spawnH;
+                
+                let overlapping = false;
+                for(let c of state.cavities) {
+                    const dist = Math.hypot(c.x - wx, c.y - wy);
+                    const minDist = (c.size + currentSize) * 1.1; 
+                    if(dist < minDist) {
+                        overlapping = true; 
+                        break;
+                    }
+                }
+
+                if(!overlapping) {
+                    const shape = generateCavityShape(wx, wy, currentSize, Math.random() * 500);
+                    state.cavities.push({ id: Date.now() + i, x: wx, y: wy, size: currentSize, shape: shape });
+                    placed = true;
+                }
+            }
+        }
+
+        updateContourOnly();
+    }
+
+    /* ---------------- RENDER ---------------- */
 
     function render() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       if (state.talismanOutline.length === 0) return;
       const pts = state.talismanOutline;
 
-      // Shadow
+      // 1. Drop Shadow
       ctx.save();
-      ctx.translate(10, 20);
+      ctx.translate(15, 30);
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.filter = 'blur(15px)';
+      ctx.filter = 'blur(25px)';
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
       for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.closePath();
       ctx.fill();
       ctx.restore();
 
-      // Body & Texture
+      // 2. Stone Base
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
       for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.closePath();
       ctx.clip(); 
-      ctx.fillStyle = '#666'; ctx.fillRect(0,0,canvas.width, canvas.height);
+      
+      ctx.fillStyle = '#444'; 
+      ctx.fillRect(0,0,canvas.width, canvas.height);
+      
       if(state.activeTextures.length > 0 && state.activeTextures[0]) {
         ctx.globalCompositeOperation = 'multiply';
         ctx.drawImage(state.activeTextures[0], 0, 0, canvas.width, canvas.height);
+        
         if(state.activeTextures[1]) {
             ctx.globalCompositeOperation = 'soft-light';
-            ctx.globalAlpha = 0.8;
-            ctx.save(); ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
-            ctx.drawImage(state.activeTextures[1], 0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = 0.7;
+            ctx.save(); 
+            ctx.translate(canvas.width/2, canvas.height/2); 
+            ctx.rotate(Math.PI); 
+            ctx.drawImage(state.activeTextures[1], -canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
             ctx.restore();
         }
       }
       ctx.globalAlpha = 1.0; 
       
-      // Gradient Lighting
+      // 3. Lighting
       ctx.globalCompositeOperation = 'overlay';
       const bbox = getBoundingBox(pts);
       const grad = ctx.createRadialGradient(
           bbox.cx - bbox.width*0.2, bbox.cy - bbox.height*0.2, 50,
-          bbox.cx, bbox.cy, bbox.height * 0.8
+          bbox.cx, bbox.cy, bbox.height * 0.9
       );
       grad.addColorStop(0, 'rgba(255, 255, 255, 0.4)'); 
       grad.addColorStop(0.5, 'rgba(128, 128, 128, 0.0)');
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0.6)');      
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0.8)');       
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.restore(); 
 
-      // Stroke
+      // 4. Outline Stroke
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
       for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.lineWidth = 1;
       ctx.stroke();
       ctx.restore();
 
-      // Cavities
+      // 5. Cavities
       state.cavities.forEach(cavity => {
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
         for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
         ctx.closePath();
-        ctx.fillStyle = '#000000';
+        
+        ctx.fillStyle = '#050505';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
         ctx.lineWidth = 1;
         ctx.stroke();
         
-        // Active Selection Highlight
         if (state.activeCavityId === cavity.id) {
-            ctx.lineWidth = 3;
             ctx.strokeStyle = '#8e44ad';
+            ctx.lineWidth = 2;
             ctx.stroke();
         }
         ctx.restore();
 
-        // Assets
+        // 6. Assets
         const assetData = state.placedAssets[cavity.id];
         if (assetData && state.images[assetData.key]) {
             const img = state.images[assetData.key];
-            const bbox = getBoundingBox(cavity.shape);
-            const fitScaleX = (bbox.width * 0.75) / img.width;
-            const fitScaleY = (bbox.height * 0.75) / img.height;
+            const cBox = getBoundingBox(cavity.shape);
+            
+            const fitScaleX = (cBox.width * 0.7) / img.width;
+            const fitScaleY = (cBox.height * 0.7) / img.height;
             const baseScale = Math.min(fitScaleX, fitScaleY);
             const finalScale = baseScale * assetData.scale;
+            
             const drawW = img.width * finalScale;
             const drawH = img.height * finalScale;
             
@@ -666,33 +798,35 @@
             ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
             for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
             ctx.clip(); 
-            ctx.translate(bbox.cx, bbox.cy);
+            
+            ctx.translate(cBox.cx, cBox.cy);
             ctx.rotate(assetData.rot * Math.PI / 180);
+            
             ctx.globalAlpha = 0.9;
             ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+            
             ctx.globalCompositeOperation = 'multiply';
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
             ctx.fillRect(-drawW/2, -drawH/2, drawW, drawH);
             ctx.restore();
         }
       });
 
-      // Text
+      // 7. Text
       if(state.intentionText) {
-          ctx.font = '14px Helvetica, Arial, sans-serif';
-          ctx.fillStyle = '#888'; 
+          ctx.font = '16px Helvetica, Arial, sans-serif';
+          ctx.fillStyle = '#666'; 
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom'; 
-          ctx.letterSpacing = '1px';
-          ctx.fillText(state.intentionText.toUpperCase(), canvas.width/2, canvas.height - 30);
+          ctx.letterSpacing = '2px';
+          ctx.fillText(state.intentionText.toUpperCase(), canvas.width/2, canvas.height - 50);
       }
     }
 
-    // --- Interaction ---
+    /* ---------------- INTERACTION ---------------- */
 
     function selectAsset(filename) {
         state.selectedAssetKey = filename;
-        draggedAssetKey = filename; 
         document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
         const active = document.querySelector(`.asset-item[data-id="${filename}"]`);
         if(active) active.classList.add('selected');
@@ -728,12 +862,9 @@
             scaleSlider.value = data.scale;
             document.getElementById('val-sigilRot').textContent = data.rot + '°';
             document.getElementById('val-sigilScale').textContent = data.scale;
-            
-            // Auto open Calibration if we just selected something
             openAccordion('acc-calibration');
         } else {
             accItem.classList.add('disabled');
-            // If it was open, close it
             if(accItem.classList.contains('active')) toggleAccordion('acc-calibration');
         }
     }
@@ -755,7 +886,11 @@
     });
 
     function handleCanvasInteraction(e) {
-      e.preventDefault(); 
+      // Allow default only if not touching canvas directly (e.g. scroll)
+      // But here we need to select cavities.
+      // We prevent default to stop scrolling when interacting with stone.
+      if(e.type !== 'mousemove') e.preventDefault(); 
+      
       const rect = canvas.getBoundingClientRect();
       let clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
       let clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
@@ -780,6 +915,7 @@
               render();
           }
       } else {
+          // If clicking background, deselect
           state.activeCavityId = null;
           updateTuningUI();
           render();
@@ -822,7 +958,7 @@
         img.onload = () => {
             state.textures.push(img);
             texturesLoaded++;
-            if(texturesLoaded === 2) generateTalisman();
+            if(texturesLoaded === 2) generateFullTalisman();
         };
         img.onerror = () => {};
       }
@@ -831,14 +967,7 @@
     canvas.addEventListener('click', handleCanvasInteraction);
     canvas.addEventListener('touchstart', handleCanvasInteraction, {passive: false});
     document.getElementById('intentionInput').addEventListener('input', (e) => { state.intentionText = e.target.value; render(); });
-    document.querySelectorAll('input[type=range]').forEach(el => {
-      if(el.id === 'sigilRot' || el.id === 'sigilScale') return; 
-      el.addEventListener('input', (e) => {
-        document.getElementById('val-' + e.target.id).textContent = e.target.value;
-        generateTalisman();
-      })
-    });
-
+    
     function clearAssets() { state.placedAssets = {}; state.activeCavityId = null; updateTuningUI(); render(); }
     function exportImage() {
         const temp = state.activeCavityId;
@@ -853,7 +982,7 @@
     }
 
     loadResources();
-    setTimeout(() => { if(state.talismanOutline.length === 0) generateTalisman(); }, 1500);
+    setTimeout(() => { if(state.talismanOutline.length === 0) generateFullTalisman(); }, 1500);
   </script>
 </body>
 </html>
