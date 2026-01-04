@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Talisman Agency v23 (Aura)</title>
+  <title>Revised Talisman (v. 3)</title>
   <style>
     :root {
       --bg-color: #000000;
@@ -41,10 +41,9 @@
       z-index: 9999;
       transform: translate(-50%, -50%);
       transition: width 0.1s ease, height 0.1s ease, opacity 0.2s ease;
-      mix-blend-mode: screen; /* Makes it look like light */
+      mix-blend-mode: screen; 
     }
 
-    /* Fallback for cursor visibility if JS fails or on white bg */
     body:hover #cursor-glow { opacity: 1; }
     
     .header {
@@ -86,7 +85,8 @@
     .sidebar-content {
       flex: 1;
       overflow-y: auto;
-      cursor: default; /* Restore cursor pointer for UI */
+      cursor: default; 
+      scroll-behavior: smooth;
     }
 
     .accordion-item {
@@ -111,6 +111,7 @@
       align-items: center;
       transition: background 0.2s;
       text-transform: uppercase;
+      min-height: 60px; 
     }
 
     .accordion-header:hover { background: #f9f9f9; }
@@ -121,7 +122,7 @@
     .accordion-body {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease-out;
+      transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1);
       background: #fafafa;
     }
     
@@ -227,7 +228,7 @@
       overflow: hidden;
       order: 2;
       padding: 0; 
-      cursor: none; /* Hide cursor on canvas */
+      cursor: none; 
     }
     
     canvas {
@@ -238,17 +239,41 @@
       object-fit: contain;
     }
 
+    /* --- MOBILE OPTIMIZATION --- */
     @media (max-width: 900px) {
       .main { flex-direction: column; }
-      .canvas-area { height: 55vh; flex: none; padding: 10px; order: 1; }
+      
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+        background: rgba(17, 17, 17, 0.9);
+      }
+
+      .canvas-area { 
+        height: 50vh; 
+        flex: none; 
+        padding: 10px; 
+        order: 1; 
+      }
+      
       canvas { height: auto; width: auto; max-height: 98%; max-width: 98%; }
-      .sidebar { width: 100%; height: auto; flex: 1; border-right: none; border-top: 1px solid #333; order: 2; }
+      
+      .sidebar { 
+        width: 100%; 
+        height: auto; 
+        flex: 1; 
+        border-right: none; 
+        border-top: 1px solid #333; 
+        order: 2; 
+      }
+      
       .assets-grid { grid-template-columns: repeat(5, 1fr); }
       
-      /* On mobile, standard cursor management */
       body { cursor: auto; }
       .canvas-area { cursor: auto; }
-      #cursor-glow { opacity: 0; } /* Hidden by default on mobile until touch */
+      #cursor-glow { opacity: 0; } 
     }
   </style>
 </head>
@@ -257,7 +282,7 @@
   <div id="cursor-glow"></div>
 
   <div class="header">
-    <h1>Talisman Agency <small>v23</small></h1>
+    <h1>Talisman Agency <small>v3</small></h1>
   </div>
   
   <div class="main">
@@ -343,7 +368,7 @@
 
       <div class="sidebar-footer">
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+          Talisman Agency v3. Mobile & Desktop Optimized. All rights reserved 2024.
         </p>
       </div>
 
@@ -364,7 +389,6 @@
     document.addEventListener('mousemove', (e) => {
       if(isTouch) return;
       cursorGlow.style.opacity = '1';
-      // Center the 60px circle on the mouse
       cursorGlow.style.left = e.clientX + 'px';
       cursorGlow.style.top = e.clientY + 'px';
       cursorGlow.style.transform = 'translate(-50%, -50%) scale(1)';
@@ -390,27 +414,45 @@
       cursorGlow.style.left = touch.clientX + 'px';
       cursorGlow.style.top = touch.clientY + 'px';
 
-      // Pressure handling
-      let force = touch.force || 0.5; // Default if not supported
+      let force = touch.force || 0.5;
       if(force === 0) force = 0.5;
-      
-      // Map force (usually 0 to 1) to scale (1.0 to 2.5)
       const scale = 1 + (force * 2.5);
-      
       cursorGlow.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
 
     /* ---------------- UI UTILS ---------------- */
     function toggleAccordion(id) {
-      const item = document.getElementById(id);
-      if (item.classList.contains('disabled')) return;
-      const body = item.querySelector('.accordion-body');
-      const isActive = item.classList.contains('active');
+      const targetItem = document.getElementById(id);
+      if (targetItem.classList.contains('disabled')) return;
+      
+      const isMobile = window.innerWidth <= 900;
+
+      // AUTO-COLLAPSE: Close others if opening new one
+      if (!targetItem.classList.contains('active')) {
+          const allItems = document.querySelectorAll('.accordion-item');
+          allItems.forEach(item => {
+              if (item.id !== id && item.classList.contains('active')) {
+                  item.classList.remove('active');
+                  item.querySelector('.accordion-body').style.maxHeight = null;
+              }
+          });
+      }
+
+      const body = targetItem.querySelector('.accordion-body');
+      const isActive = targetItem.classList.contains('active');
+      
       if (!isActive) {
-        item.classList.add('active');
+        targetItem.classList.add('active');
         body.style.maxHeight = body.scrollHeight + "px";
+        
+        if (isMobile) {
+            setTimeout(() => {
+                targetItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+
       } else {
-        item.classList.remove('active');
+        targetItem.classList.remove('active');
         body.style.maxHeight = null;
       }
     }
@@ -425,18 +467,7 @@
     }
 
     /* ---------------- ASSETS ---------------- */
-    const assetFilenames = [
-      'sg_0001.png', 'sg_0008b.png', 'sg_0023c.png', 'sg_0047a.png', 
-      'sg_0055d.png', 'sg_0056b.png','sg_0058d.png', 'sg_0063a.png', 
-      'sg_0067.png', 'sg_0070.png','sg_0072.png', 'sg_0078a.png', 
-      'sg_0078f.png', 'sg_0080b.png', 'sg_0080c.png', 'sg_0085a.png', 
-      'sg_0085b.png', 'sg_0086a.png','sg_0096a.png', 'sg_0096b.png', 
-      'sg_0096h.png', 'sg_0097b.png','sg_0104c.png', 'sg_0104g.png', 
-      'sg_0148.png', 'sg_0191.png'
-    ];
     const ASSET_PATH = 'Spec_Geo_Assets/';
-    const TEXTURE_COUNT = 10;
-    const TEXTURE_PATH = 'Textures/';
     const LS_KEY = 'talisman_custom_assets_v2';
 
     /* ---------------- STATE ---------------- */
@@ -537,7 +568,6 @@
       return smoothPoints(points, 2);
     }
 
-    // Polar equation for rounded rectangle (Superellipse)
     function getPhoneRadius(angle, w, h) {
         const n = 4.5; 
         const a = w/2;
@@ -579,11 +609,8 @@
         const phoneHeight = canvas.height - (margin * 2);
         const phoneWidth = phoneHeight * 0.56; 
         
-        // HARD SAFETY LIMIT: The stone edge must never be closer than this to a hole
         const absoluteMinEdgeDistance = 25; 
-        // Breathing room for the "tightest" erosion setting
         const erosionPadding = 40; 
-
         const minCoreSize = 100;
         
         const points = [];
@@ -592,30 +619,24 @@
         for (let i = 0; i < steps; i++) {
             const angle = (i / steps) * Math.PI * 2;
             
-            // 1. Outer Boundary (Quirkier "Found Rock" Shape)
             let maxR = getPhoneRadius(angle, phoneWidth, phoneHeight);
             const baseShapeNoise = noise(i * 0.02 + state.contourSeed * 0.5) - 0.5;
             maxR += baseShapeNoise * (maxR * 0.25);
 
-            // 2. Inner Boundaries
             const cavityReach = getMaxCavityReach(cx, cy, angle);
             
             let erosionTargetR = cavityReach + erosionPadding;
             erosionTargetR = Math.max(erosionTargetR, minCoreSize);
-
             const absoluteHardLimitR = cavityReach + absoluteMinEdgeDistance;
             
             if (maxR < erosionTargetR + 20) maxR = erosionTargetR + 20;
 
-            // 3. Interpolation
             let finalR = maxR * (1 - erosion) + erosionTargetR * erosion;
             
-            // 4. Surface Noise
             const noiseScale = 10 + (erosion * 30); 
             const nVal = noise(i * 0.15 + state.contourSeed) - 0.5; 
             finalR += nVal * noiseScale;
 
-            // 5. FINAL HARD SAFETY CHECK
             if (finalR < absoluteHardLimitR) finalR = absoluteHardLimitR;
 
             points.push({
@@ -638,18 +659,13 @@
         state.contourSeed = Math.random() * 100; 
         updateTuningUI();
 
-        if(state.textures.length > 0) {
-            const t1 = Math.floor(Math.random() * state.textures.length);
-            let t2 = Math.floor(Math.random() * state.textures.length);
-            state.activeTextures = [state.textures[t1], state.textures[t2]];
-        }
+        state.activeTextures = [];
 
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
         
         const spawnH = (canvas.height * 0.85) * 0.80; 
         const spawnW = (spawnH * 0.56) * 0.70; 
-        
         const sizeFactor = Math.max(60, 260 - (numCavities * 22)); 
 
         for(let i=0; i<numCavities; i++) {
@@ -662,6 +678,11 @@
                 if (attempts > 50) currentSize *= 0.98;
                 if (attempts > 200) currentSize *= 0.98; 
                 if (currentSize < 20) currentSize = 20; 
+
+                // Safety Break to prevent infinite loop / freezing
+                if (attempts > 1000) { 
+                    break; 
+                }
 
                 const wx = (cx - spawnW/2) + Math.random() * spawnW;
                 const wy = (cy - spawnH/2) + Math.random() * spawnH;
@@ -714,26 +735,13 @@
       ctx.closePath();
       ctx.clip(); 
       
-      ctx.fillStyle = '#444'; 
+      // Slightly lighter grey for better visibility against black bg
+      ctx.fillStyle = '#555'; 
       ctx.fillRect(0,0,canvas.width, canvas.height);
       
-      if(state.activeTextures.length > 0 && state.activeTextures[0]) {
-        ctx.globalCompositeOperation = 'multiply';
-        ctx.drawImage(state.activeTextures[0], 0, 0, canvas.width, canvas.height);
-        
-        if(state.activeTextures[1]) {
-            ctx.globalCompositeOperation = 'soft-light';
-            ctx.globalAlpha = 0.7;
-            ctx.save(); 
-            ctx.translate(canvas.width/2, canvas.height/2); 
-            ctx.rotate(Math.PI); 
-            ctx.drawImage(state.activeTextures[1], -canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
-            ctx.restore();
-        }
-      }
       ctx.globalAlpha = 1.0; 
       
-      // 3. Lighting
+      // 3. Lighting (Inside the clip)
       ctx.globalCompositeOperation = 'overlay';
       const bbox = getBoundingBox(pts);
       const grad = ctx.createRadialGradient(
@@ -742,10 +750,11 @@
       );
       grad.addColorStop(0, 'rgba(255, 255, 255, 0.4)'); 
       grad.addColorStop(0.5, 'rgba(128, 128, 128, 0.0)');
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0.8)');       
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0.8)');        
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.restore(); 
+      
+      ctx.restore(); // Restore clip and composite
 
       // 4. Outline Stroke
       ctx.save();
@@ -885,11 +894,18 @@
         }
     });
 
+    // Intention Text
+    document.getElementById('intentionInput').addEventListener('input', (e) => {
+        state.intentionText = e.target.value;
+        render();
+    });
+
     function handleCanvasInteraction(e) {
-      // Allow default only if not touching canvas directly (e.g. scroll)
-      // But here we need to select cavities.
-      // We prevent default to stop scrolling when interacting with stone.
-      if(e.type !== 'mousemove') e.preventDefault(); 
+      if(e.type === 'touchmove') {
+          // allow scroll
+      } else if (e.type !== 'touchstart') {
+          e.preventDefault(); 
+      }
       
       const rect = canvas.getBoundingClientRect();
       let clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
@@ -905,84 +921,88 @@
               state.placedAssets[target.id] = { key: state.selectedAssetKey, rot: 0, scale: 1.0 };
               state.selectedAssetKey = null; 
               document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
-              state.activeCavityId = target.id; 
-              updateTuningUI();
-              render();
-          } 
-          else if (state.placedAssets[target.id]) {
-              state.activeCavityId = target.id;
-              updateTuningUI();
-              render();
           }
+          state.activeCavityId = target.id;
+          updateTuningUI();
+          render();
       } else {
-          // If clicking background, deselect
           state.activeCavityId = null;
           updateTuningUI();
           render();
       }
     }
-
-    function loadSingleAsset(id, src, isCustom = false) {
-        const grid = document.getElementById('assetGrid');
-        const img = new Image();
-        img.src = src;
-        img.onload = () => { 
-            state.images[id] = img;
-            if(isCustom) selectAsset(id);
-            render(); 
-        };
-        const div = document.createElement('div');
-        div.className = 'asset-item' + (isCustom ? ' custom' : '');
-        div.dataset.id = id;
-        const thumb = document.createElement('img');
-        thumb.src = src;
-        div.appendChild(thumb);
-        div.addEventListener('click', () => { selectAsset(id); });
-        if(isCustom && grid.firstChild) grid.insertBefore(div, grid.firstChild);
-        else grid.appendChild(div);
-    }
-
-    function loadResources() {
-      const grid = document.getElementById('assetGrid');
-      grid.innerHTML = '';
-      try {
-        const saved = localStorage.getItem(LS_KEY);
-        if (saved) JSON.parse(saved).forEach(asset => loadSingleAsset(asset.id, asset.src, true));
-      } catch (e) {}
-      assetFilenames.forEach(filename => loadSingleAsset(filename, ASSET_PATH + filename, false));
-      let texturesLoaded = 0;
-      for(let i=1; i<=TEXTURE_COUNT; i++) {
-        const num = i.toString().padStart(2, '0');
-        const img = new Image();
-        img.src = `${TEXTURE_PATH}texture${num}.png`;
-        img.onload = () => {
-            state.textures.push(img);
-            texturesLoaded++;
-            if(texturesLoaded === 2) generateFullTalisman();
-        };
-        img.onerror = () => {};
-      }
-    }
-
-    canvas.addEventListener('click', handleCanvasInteraction);
-    canvas.addEventListener('touchstart', handleCanvasInteraction, {passive: false});
-    document.getElementById('intentionInput').addEventListener('input', (e) => { state.intentionText = e.target.value; render(); });
     
-    function clearAssets() { state.placedAssets = {}; state.activeCavityId = null; updateTuningUI(); render(); }
+    // Attach Listeners
+    canvas.addEventListener('mousedown', handleCanvasInteraction);
+    canvas.addEventListener('touchstart', handleCanvasInteraction);
+
+    /* ---------------- EXPORT ---------------- */
     function exportImage() {
-        const temp = state.activeCavityId;
-        state.activeCavityId = null; 
-        render();
         const link = document.createElement('a');
-        link.download = `Talisman.png`;
+        link.download = 'talisman-v3.png';
         link.href = canvas.toDataURL();
         link.click();
-        state.activeCavityId = temp;
+    }
+    
+    function clearAssets() {
+        state.placedAssets = {};
+        state.activeCavityId = null;
+        updateTuningUI();
         render();
     }
 
-    loadResources();
-    setTimeout(() => { if(state.talismanOutline.length === 0) generateFullTalisman(); }, 1500);
+    /* ---------------- ASSET LOADING ---------------- */
+    function loadSingleAsset(key, src, isCustom=false) {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+            state.images[key] = img;
+            
+            const div = document.createElement('div');
+            div.className = 'asset-item';
+            if(isCustom) div.classList.add('custom');
+            div.dataset.id = key;
+            div.onclick = () => selectAsset(key);
+            
+            const thumb = new Image();
+            thumb.src = src;
+            div.appendChild(thumb);
+            
+            document.getElementById('assetGrid').appendChild(div);
+        };
+    }
+
+    function initAssets() {
+        // Generate placeholders instantly
+        const colors = ['#5DADE2', '#AF7AC5', '#F1948A', '#F7DC6F', '#58D68D', '#CACFD2'];
+        for(let i=0; i<12; i++) {
+            const canvasP = document.createElement('canvas');
+            canvasP.width = 100; canvasP.height = 100;
+            const ctxP = canvasP.getContext('2d');
+            ctxP.fillStyle = colors[i % colors.length];
+            ctxP.beginPath(); ctxP.arc(50,50,40,0,Math.PI*2); ctxP.fill();
+            ctxP.fillStyle = '#fff';
+            ctxP.font = '30px Arial'; ctxP.textAlign = 'center'; 
+            ctxP.fillText("?", 50, 60);
+            
+            const key = 'builtin_'+i;
+            loadSingleAsset(key, canvasP.toDataURL());
+        }
+
+        try {
+            const saved = localStorage.getItem(LS_KEY);
+            if(saved) {
+                const arr = JSON.parse(saved);
+                arr.forEach(item => loadSingleAsset(item.id, item.src, true));
+            }
+        } catch(e) {}
+    }
+
+    /* ---------------- MAIN INIT ---------------- */
+    // Trigger immediately (no window.onload wait)
+    initAssets();
+    generateFullTalisman();
+
   </script>
 </body>
 </html>
