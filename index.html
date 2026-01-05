@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Talisman Agency (Fuck Yes)</title>
+  <title>Talisman Agency</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,12 +11,17 @@
 
   <style>
     :root {
+      /* [NOTE] GLOBAL COLORS */
       --bg-color: #000000;
-      --sidebar-bg: #f4f4f4;
-      --accent: #333; 
+      
+      /* [NOTE] SIDEBAR PALETTE */
+      --sidebar-bg: #111111;       
+      --sidebar-surface: #1a1a1a;  
+      --text-main: #cccccc;        
+      --text-muted: #777777;       
+      --border-color: #333333;     
       --highlight: #8e44ad;
-      --text-main: #333;
-      --border-color: #ddd;
+      --accent: #555; 
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -53,7 +58,7 @@
       justify-content: center; 
       align-items: center;
       border-bottom: none;
-      flex-shrink: 0; z-index: 10; color: #fff;
+      flex-shrink: 0; z-index: 10; color: #835383
     }
     .header h1 { font-size: 1.5rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 400;}
     
@@ -63,27 +68,31 @@
     .sidebar {
       width: 360px;
       background: var(--sidebar-bg);
+      color: var(--text-main);
       
       margin: 10px 0 20px 20px;
       height: calc(100% - 30px);
       
-      /* UPDATED: More dramatic radius values to ensure visibility */
       border-radius: 45px 25px 55px 30px / 30px 55px 25px 45px;
-      
-      /* UPDATED: Slight rotation breaks the perfect vertical line */
       transform: rotate(-0.5deg);
       
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+      /* [NOTE] FUZZINESS SETTINGS */
+      box-shadow: 
+        0 0 10px 1px var(--sidebar-bg), 
+        0 20px 50px rgba(0,0,0,1); 
       
-      /* UPDATED: Faster, more obvious animation */
+      border: 1px solid #222; 
+      
       animation: morphBorder 6s ease-in-out infinite alternate;
+      
+      /* [NOTE] WOBBLY EDGE FILTER APPLIED HERE */
+      filter: url(#wobbly); 
       
       overflow: hidden; 
       display: flex; flex-direction: column; flex-shrink: 0; z-index: 2; order: 1;
       position: relative;
     }
 
-    /* UPDATED: Keyframes with higher variance */
     @keyframes morphBorder {
       0% { 
         border-radius: 45px 25px 55px 30px / 30px 55px 25px 45px;
@@ -91,63 +100,87 @@
       }
       100% { 
         border-radius: 25px 55px 30px 45px / 55px 30px 45px 25px;
-        transform: rotate(0deg); /* Slight sway */
+        transform: rotate(0deg); 
       }
     }
     
     .sidebar-content { flex: 1; overflow-y: auto; cursor: default; padding-right: 0; }
 
     .sidebar-footer {
+        font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif";
         padding: 20px;
-        font-size: 0.85rem;
-        color: #888;
-        border-top: 1px solid #e0e0e0;
-        line-height: 1.4;
-        background: #f9f9f9;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        border-top: 1px solid var(--border-color);
+        line-height: 1.2;
+        background: var(--sidebar-bg);
     }
 
-    .accordion-item { border-bottom: 1px solid var(--border-color); background: #fff; }
+    .accordion-item { border-bottom: 1px solid var(--border-color); background: var(--sidebar-surface); }
+    
     .accordion-header {
-      width: 100%; text-align: left; background: #fff; padding: 20px;
+      width: 100%; text-align: left; 
+      background: var(--sidebar-surface);
+      padding: 20px;
       border: none; outline: none; cursor: pointer;
       font-family: 'Stylish', sans-serif;
       font-size: 1.1rem; 
-      font-weight: 400; letter-spacing: 1px; color: #444;
+      font-weight: 300; letter-spacing: 1px; 
+      color: #eee;
       display: flex; justify-content: space-between; align-items: center;
       text-transform: uppercase; min-height: 60px; 
     }
-    .accordion-header:hover { background: #f9f9f9; }
-    .accordion-header::after { content: '+'; font-size: 1.2rem; font-weight: 300; color: #888; }
+    .accordion-header:hover { background: #252525; }
+    .accordion-header::after { content: '+'; font-size: 1.2rem; font-weight: 300; color: #666; }
     .accordion-item.active .accordion-header::after { content: '-'; }
     
-    .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1); background: #fafafa; }
-    .accordion-inner { padding: 20px; border-top: 1px solid #eee; }
+    .accordion-body { 
+        max-height: 0; overflow: hidden; 
+        transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
+        background: var(--sidebar-bg);
+    }
+    .accordion-inner { padding: 20px; border-top: 1px solid var(--border-color); }
     .accordion-item.disabled { pointer-events: none; opacity: 0.5; }
 
     /* --- FORM ELEMENTS --- */
     .text-input { 
-        width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; 
+        width: 100%; padding: 12px; 
+        background: #000;
+        border: 1px solid #444; 
+        color: #fff;
+        border-radius: 6px; 
         font-family: 'Stylish', sans-serif; font-size: 1.1rem; 
     }
+    .text-input:focus { outline: none; border-color: var(--highlight); }
+
     .slider-row { margin-bottom: 15px; }
-    .slider-row label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; color: #555;}
-    input[type="range"] { width: 100%; accent-color: var(--accent); height: 6px; cursor: pointer; }
+    .slider-row label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; color: #999;}
+    input[type="range"] { width: 100%; accent-color: var(--highlight); height: 6px; cursor: pointer; background: #333; }
     
     .btn { 
         width: 100%; padding: 12px; border: none; border-radius: 6px; 
         font-family: 'Stylish', sans-serif; font-size: 1.1rem; 
         cursor: pointer; text-transform: uppercase; margin-bottom: 10px; 
     }
-    .btn-primary { background: #333; color: white; margin-top: 10px; }
-    .btn-secondary { background: #e0e0e0; color: #333; }
+    .btn-primary { background: #eee; color: #000; margin-top: 10px; } 
+    .btn-primary:hover { background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+    
+    .btn-secondary { background: #333; color: #ccc; border: 1px solid #444; }
+    .btn-secondary:hover { background: #444; color: #fff; }
     
     .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; margin-bottom: 15px; }
     .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
 
     .assets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .asset-item { aspect-ratio: 1; background: #fff; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; position: relative; }
-    .asset-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-    .asset-item.selected { border-color: var(--highlight); background: #f4ecf7; transform: scale(1.05); }
+    
+    .asset-item { 
+        aspect-ratio: 1; 
+        background: #222; 
+        border: 1px solid #444; 
+        border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; position: relative; 
+    }
+    .asset-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: invert(0.1); } 
+    .asset-item.selected { border-color: var(--highlight); background: #333; transform: scale(1.05); }
     
     /* --- CANVAS --- */
     .canvas-area {
@@ -159,9 +192,18 @@
     /* --- MOBILE --- */
     @media (max-width: 900px) {
       .main { flex-direction: column; }
-      .header { position: sticky; top: 0; z-index: 1000; background: rgba(17, 17, 17, 0.9); border-bottom: 1px solid #333; }
+      .header { position: sticky; top: 0; z-index: 1000; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #333; }
       .canvas-area { height: 50vh; flex: none; order: 1; padding: 10px; cursor: auto;}
-      .sidebar { width: 100%; flex: 1; margin: 0; border-radius: 0; height: auto; border-top: 1px solid #333; order: 2; animation: none; transform: none; }
+      
+      .sidebar { 
+          width: 100%; flex: 1; margin: 0; 
+          border-radius: 0; 
+          height: auto; border-top: 1px solid #333; 
+          order: 2; animation: none; transform: none; 
+          box-shadow: none;
+          filter: none; /* Disable wobble on mobile for performance */
+      }
+      
       .assets-grid { grid-template-columns: repeat(5, 1fr); }
       #cursor-glow { display: none; } 
     }
@@ -169,10 +211,17 @@
 </head>
 <body>
 
+  <svg style="position: absolute; width: 0; height: 0; pointer-events: none;">
+    <filter id="wobbly">
+      <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="warp" />
+      <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="3" in="SourceGraphic" in2="warp" />
+    </filter>
+  </svg>
+
   <div id="cursor-glow"></div>
 
   <div class="header">
-    <h1>Talisman Agency <small>A Periapt for Devices</small></h1>
+    <h1>*:･ﾟ✧*:･ﾟ Talisman for Devices <small>v. I.0</small>  *:･ﾟ✧*:･ﾟ</h1>
   </div>
   
   <div class="main">
@@ -180,14 +229,14 @@
       <div class="sidebar-content">
         
         <div class="accordion-item" id="acc-intention">
-          <button class="accordion-header" onclick="toggleAccordion('acc-intention')">I. Intention</button>
+          <button class="accordion-header" onclick="toggleAccordion('acc-intention')">I. Intention ˚ · • . ° .</button>
           <div class="accordion-body"><div class="accordion-inner">
              <input type="text" id="intentionInput" class="text-input" placeholder="Type intention..." maxlength="40">
           </div></div>
         </div>
 
         <div class="accordion-item" id="acc-formation">
-          <button class="accordion-header" onclick="toggleAccordion('acc-formation')">II. Formation</button>
+          <button class="accordion-header" onclick="toggleAccordion('acc-formation')">II. Formation *. * ·:･ﾟ</button>
           <div class="accordion-body"><div class="accordion-inner">
               <div class="slider-row">
                 <label>Cavities <span id="val-windows">4</span></label>
@@ -202,7 +251,7 @@
         </div>
 
         <div class="accordion-item" id="acc-selection">
-          <button class="accordion-header" onclick="toggleAccordion('acc-selection')">III. Selection</button>
+          <button class="accordion-header" onclick="toggleAccordion('acc-selection')">III. Selection *:･ﾟ✧*:･ﾟ</button>
           <div class="accordion-body"><div class="accordion-inner">
               <div class="upload-btn-wrapper">
                 <button class="btn btn-secondary">+ Upload Custom Sigil</button>
@@ -221,16 +270,16 @@
         </div>
 
         <div class="accordion-item" id="acc-exportation">
-          <button class="accordion-header" onclick="toggleAccordion('acc-exportation')">V. Exportation</button>
+          <button class="accordion-header" onclick="toggleAccordion('acc-exportation')">V. Exportation︒⚬∙︓·⠄</button>
           <div class="accordion-body"><div class="accordion-inner">
               <button class="btn btn-secondary" onclick="exportImage()">Download</button>
-              <button class="btn btn-secondary" onclick="clearAssets()" style="background:#fff; border:1px solid #ccc;">Clear Sigils</button>
+              <button class="btn btn-secondary" onclick="clearAssets()" style="background:transparent; border:1px solid #444; color: #888;">Clear Sigils</button>
           </div></div>
         </div>
       </div>
       
       <div class="sidebar-footer">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
+          Spirits of zero and one; and command key of the unseen to manifest fortune and desire through this talisman. The Ordinal Solid guides direction and form. JULMstudios 2026
       </div>
     </div>
 
