@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Revised Talisman (v. 3)</title>
+  <title>Talisman Agency (Stylish Edition)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Stylish&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --bg-color: #000000;
@@ -17,7 +22,8 @@
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     body {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      /* 2. APPLY FONT TO UI */
+      font-family: 'Stylish', sans-serif;
       background: var(--bg-color);
       height: 100vh;
       overflow: hidden; 
@@ -25,255 +31,98 @@
       color: var(--text-main);
       display: flex;
       flex-direction: column;
-      cursor: none; /* Hide default cursor to show glow better */
+      cursor: none; 
     }
     
     /* --- CUSTOM CURSOR GLOW --- */
     #cursor-glow {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 60px;
-      height: 60px;
+      top: 0; left: 0; width: 60px; height: 60px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(142, 68, 173, 0.6) 0%, rgba(142, 68, 173, 0) 70%);
-      pointer-events: none;
-      z-index: 9999;
+      pointer-events: none; z-index: 9999;
       transform: translate(-50%, -50%);
-      transition: width 0.1s ease, height 0.1s ease, opacity 0.2s ease;
+      transition: opacity 0.2s ease;
       mix-blend-mode: screen; 
     }
-
     body:hover #cursor-glow { opacity: 1; }
     
     .header {
-      background: #111;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #333;
-      flex-shrink: 0;
-      z-index: 10;
-      color: #fff;
+      background: #111; padding: 15px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #333; flex-shrink: 0; z-index: 10; color: #fff;
     }
-
-    .header h1 { font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 400;}
-    .header small { font-size: 0.7rem; color: #888; }
+    .header h1 { font-size: 1.5rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 400;}
     
-    .main {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-      flex-direction: row; 
-    }
+    .main { display: flex; flex: 1; overflow: hidden; position: relative; flex-direction: row; }
     
-    /* --- SIDEBAR STYLING --- */
+    /* --- SIDEBAR --- */
     .sidebar {
-      width: 340px;
-      background: var(--sidebar-bg);
-      border-right: 1px solid #333;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      z-index: 2;
-      order: 1;
-      height: 100%;
+      width: 340px; background: var(--sidebar-bg); border-right: 1px solid #333;
+      display: flex; flex-direction: column; flex-shrink: 0; z-index: 2; order: 1; height: 100%;
     }
     
-    .sidebar-content {
-      flex: 1;
-      overflow-y: auto;
-      cursor: default; 
-      scroll-behavior: smooth;
-    }
+    .sidebar-content { flex: 1; overflow-y: auto; cursor: default; }
 
-    .accordion-item {
-      border-bottom: 1px solid var(--border-color);
-      background: #fff;
-    }
-
+    .accordion-item { border-bottom: 1px solid var(--border-color); background: #fff; }
     .accordion-header {
-      width: 100%;
-      text-align: left;
-      background: #fff;
-      padding: 20px;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #444;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: background 0.2s;
-      text-transform: uppercase;
-      min-height: 60px; 
+      width: 100%; text-align: left; background: #fff; padding: 20px;
+      border: none; outline: none; cursor: pointer;
+      /* Update header font size slightly for Stylish font readability */
+      font-family: 'Stylish', sans-serif;
+      font-size: 1.1rem; 
+      font-weight: 400; letter-spacing: 1px; color: #444;
+      display: flex; justify-content: space-between; align-items: center;
+      text-transform: uppercase; min-height: 60px; 
     }
-
     .accordion-header:hover { background: #f9f9f9; }
     .accordion-header::after { content: '+'; font-size: 1.2rem; font-weight: 300; color: #888; }
     .accordion-item.active .accordion-header::after { content: '-'; }
-    .accordion-item.active .accordion-header { background: #f0f0f0; color: #000; }
-
-    .accordion-body {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-      background: #fafafa;
-    }
     
+    .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1); background: #fafafa; }
     .accordion-inner { padding: 20px; border-top: 1px solid #eee; }
     .accordion-item.disabled { pointer-events: none; opacity: 0.5; }
 
-    .sidebar-footer {
-      padding: 20px;
-      background: #fff;
-      border-top: 1px solid #ddd;
-      font-size: 0.75rem;
-      color: #999;
-      line-height: 1.4;
-      text-align: justify;
-    }
-
     /* --- FORM ELEMENTS --- */
-    .text-input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
-      background: #fff;
+    .text-input { 
+        width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; 
+        font-family: 'Stylish', sans-serif; font-size: 1.1rem; 
     }
-    
     .slider-row { margin-bottom: 15px; }
-    .slider-row label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; color: #555;}
+    .slider-row label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; color: #555;}
     input[type="range"] { width: 100%; accent-color: var(--accent); height: 6px; cursor: pointer; }
     
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: all 0.2s;
-      text-align: center;
+    .btn { 
+        width: 100%; padding: 12px; border: none; border-radius: 6px; 
+        font-family: 'Stylish', sans-serif; font-size: 1.1rem; 
+        cursor: pointer; text-transform: uppercase; margin-bottom: 10px; 
     }
-    
     .btn-primary { background: #333; color: white; margin-top: 10px; }
-    .btn-primary:hover { background: #000; }
-    .btn-secondary { background: #e0e0e0; color: #333; margin-bottom: 10px;}
+    .btn-secondary { background: #e0e0e0; color: #333; }
     
-    .upload-btn-wrapper {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
-      width: 100%;
-      margin-bottom: 15px;
-    }
-    
-    .upload-btn-wrapper input[type=file] {
-      font-size: 100px;
-      position: absolute;
-      left: 0;
-      top: 0;
-      opacity: 0;
-      cursor: pointer;
-      height: 100%;
-    }
+    .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; margin-bottom: 15px; }
+    .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
 
-    .assets-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
-    
-    .asset-item {
-      aspect-ratio: 1;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px;
-      transition: all 0.2s;
-      position: relative;
-    }
-    
+    .assets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .asset-item { aspect-ratio: 1; background: #fff; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; position: relative; }
     .asset-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-    .asset-item.custom::after { content: '•'; position: absolute; top: 2px; right: 4px; color: var(--highlight); font-size: 1.2rem; line-height: 0.5; }
-    .asset-item.selected {
-      border-color: var(--highlight);
-      background: #f4ecf7;
-      transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(142, 68, 173, 0.2);
-    }
+    .asset-item.selected { border-color: var(--highlight); background: #f4ecf7; transform: scale(1.05); }
     
     /* --- CANVAS --- */
     .canvas-area {
-      flex: 1;
-      background: #000000; 
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-      order: 2;
-      padding: 0; 
-      cursor: none; 
+      flex: 1; background: #000000; display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden; order: 2; cursor: none; 
     }
-    
-    canvas {
-      box-shadow: 0 0 100px rgba(255,255,255,0.05); 
-      height: 96%; 
-      width: auto;
-      max-width: 98%;
-      object-fit: contain;
-    }
+    canvas { height: 96%; width: auto; max-width: 98%; object-fit: contain; }
 
-    /* --- MOBILE OPTIMIZATION --- */
+    /* --- MOBILE --- */
     @media (max-width: 900px) {
       .main { flex-direction: column; }
-      
-      .header {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        backdrop-filter: blur(10px);
-        background: rgba(17, 17, 17, 0.9);
-      }
-
-      .canvas-area { 
-        height: 50vh; 
-        flex: none; 
-        padding: 10px; 
-        order: 1; 
-      }
-      
-      canvas { height: auto; width: auto; max-height: 98%; max-width: 98%; }
-      
-      .sidebar { 
-        width: 100%; 
-        height: auto; 
-        flex: 1; 
-        border-right: none; 
-        border-top: 1px solid #333; 
-        order: 2; 
-      }
-      
+      .header { position: sticky; top: 0; z-index: 1000; background: rgba(17, 17, 17, 0.9); }
+      .canvas-area { height: 50vh; flex: none; order: 1; padding: 10px; cursor: auto;}
+      .sidebar { width: 100%; flex: 1; border-right: none; border-top: 1px solid #333; order: 2; }
       .assets-grid { grid-template-columns: repeat(5, 1fr); }
-      
-      body { cursor: auto; }
-      .canvas-area { cursor: auto; }
-      #cursor-glow { opacity: 0; } 
+      #cursor-glow { display: none; } 
     }
   </style>
 </head>
@@ -282,30 +131,23 @@
   <div id="cursor-glow"></div>
 
   <div class="header">
-    <h1>Talisman Agency <small>v3</small></h1>
+    <h1>Talisman Agency <small>v3.3</small></h1>
   </div>
   
   <div class="main">
-    
     <div class="sidebar">
-      
       <div class="sidebar-content">
+        
         <div class="accordion-item" id="acc-intention">
           <button class="accordion-header" onclick="toggleAccordion('acc-intention')">I. Intention</button>
-          <div class="accordion-body">
-            <div class="accordion-inner">
-               <div style="font-size:0.8rem; color:#666; margin-bottom:10px;">
-                 Set an intention for your talisman. This will be etched at the base of the stone.
-               </div>
-               <input type="text" id="intentionInput" class="text-input" placeholder="Type intention here..." maxlength="40">
-            </div>
-          </div>
+          <div class="accordion-body"><div class="accordion-inner">
+             <input type="text" id="intentionInput" class="text-input" placeholder="Type intention..." maxlength="40">
+          </div></div>
         </div>
 
         <div class="accordion-item" id="acc-formation">
           <button class="accordion-header" onclick="toggleAccordion('acc-formation')">II. Formation</button>
-          <div class="accordion-body">
-            <div class="accordion-inner">
+          <div class="accordion-body"><div class="accordion-inner">
               <div class="slider-row">
                 <label>Cavities <span id="val-windows">4</span></label>
                 <input type="range" id="windows" min="1" max="8" value="4" oninput="updateVal('windows', this.value); generateFullTalisman()">
@@ -315,195 +157,109 @@
                 <input type="range" id="roughness" min="0.0" max="1.0" step="0.01" value="0.0" oninput="updateVal('roughness', this.value); updateContourOnly()">
               </div>
               <button class="btn btn-primary" onclick="generateFullTalisman()">Reform Talisman</button>
-            </div>
-          </div>
+          </div></div>
         </div>
 
         <div class="accordion-item" id="acc-selection">
           <button class="accordion-header" onclick="toggleAccordion('acc-selection')">III. Selection</button>
-          <div class="accordion-body">
-            <div class="accordion-inner">
+          <div class="accordion-body"><div class="accordion-inner">
               <div class="upload-btn-wrapper">
-                <button class="btn btn-secondary" style="margin-bottom:0; font-size:0.8rem;">+ Upload Custom Sigil</button>
-                <input type="file" id="fileUpload" accept="image/png, image/jpeg, image/gif" onchange="handleFileUpload(event)" />
-              </div>
-              <div style="margin-bottom:8px; font-size: 0.8rem; color:#666;">
-                1. Select a sigil below.<br>2. Tap a cavity on the stone.
+                <button class="btn btn-secondary">+ Upload Custom Sigil</button>
+                <input type="file" id="fileUpload" accept="image/*" onchange="handleFileUpload(event)" />
               </div>
               <div class="assets-grid" id="assetGrid"></div>
-            </div>
-          </div>
+          </div></div>
         </div>
 
         <div class="accordion-item disabled" id="acc-calibration">
           <button class="accordion-header" onclick="toggleAccordion('acc-calibration')">IV. Calibration</button>
-          <div class="accordion-body">
-            <div class="accordion-inner">
-               <div style="font-size:0.8rem; color:#666; margin-bottom:15px;">
-                 Adjust the selected sigil.
-               </div>
-              <div class="slider-row">
-                <label>Rotate <span id="val-sigilRot">0°</span></label>
-                <input type="range" id="sigilRot" min="-180" max="180" value="0">
-              </div>
-              <div class="slider-row">
-                <label>Scale <span id="val-sigilScale">1.0</span></label>
-                <input type="range" id="sigilScale" min="0.2" max="3.0" step="0.1" value="1.0">
-              </div>
-            </div>
-          </div>
+          <div class="accordion-body"><div class="accordion-inner">
+              <div class="slider-row"><label>Rotate</label><input type="range" id="sigilRot" min="-180" max="180" value="0"></div>
+              <div class="slider-row"><label>Scale</label><input type="range" id="sigilScale" min="0.2" max="3.0" step="0.1" value="1.0"></div>
+          </div></div>
         </div>
 
         <div class="accordion-item" id="acc-exportation">
           <button class="accordion-header" onclick="toggleAccordion('acc-exportation')">V. Exportation</button>
-          <div class="accordion-body">
-            <div class="accordion-inner">
-              <button class="btn btn-secondary" onclick="exportImage()">Download Talisman</button>
-              <button class="btn btn-secondary" onclick="clearAssets()" style="background:#fff; border:1px solid #ccc; margin-bottom:0;">Clear Sigils</button>
-            </div>
-          </div>
+          <div class="accordion-body"><div class="accordion-inner">
+              <button class="btn btn-secondary" onclick="exportImage()">Download</button>
+              <button class="btn btn-secondary" onclick="clearAssets()" style="background:#fff; border:1px solid #ccc;">Clear Sigils</button>
+          </div></div>
         </div>
-
       </div>
-
-      <div class="sidebar-footer">
-        <p>
-          Talisman Agency v3. Mobile & Desktop Optimized. All rights reserved 2024.
-        </p>
-      </div>
-
     </div>
 
     <div class="canvas-area">
       <canvas id="canvas" width="900" height="1500"></canvas>
     </div>
-
   </div>
 
   <script>
-    /* ---------------- CURSOR GLOW ---------------- */
-    const cursorGlow = document.getElementById('cursor-glow');
-    let isTouch = false;
+    // --- CONFIGURATION ---
+    
+ // 1. TEXTURES: List every file in your "Textures" folder here.
+    const TEXTURE_FILENAMES = [
+        'texture01.png',
+        'texture02.png', 
+        'texture03.png',
+		'texture04.png',
+        'texture05.png', 
+        'texture06.png',
+		'texture07.png',
+        'texture08.png', 
+        'texture09.png',
+		'texture10.png',
+        // Add more here: 'stone_granite.png', 'cracks.png', etc.
+    ];
 
-    // Desktop: Mouse Move
-    document.addEventListener('mousemove', (e) => {
-      if(isTouch) return;
-      cursorGlow.style.opacity = '1';
-      cursorGlow.style.left = e.clientX + 'px';
-      cursorGlow.style.top = e.clientY + 'px';
-      cursorGlow.style.transform = 'translate(-50%, -50%) scale(1)';
-    });
+    // 2. SIGILS: List files in "assets" folder
+    const SIGIL_FILENAMES = [
+        'sg_0001.png', 'sg_0008b.png', 'sg_0023c.png', 'sg_0047a.png', 'sg_0055d.png', 'sg_0056b.png','sg_0058d.png', 'sg_0063a.png', 'sg_0067.png', 'sg_0070.png','sg_0072.png', 'sg_0078a.png', 'sg_0078f.png', 'sg_0080b.png', 'sg_0080c.png', 'sg_0085a.png', 'sg_0085b.png', 'sg_0086a.png','sg_0096a.png', 'sg_0096b.png', 'sg_0096h.png', 'sg_0097b.png','sg_0104c.png', 'sg_0104g.png', 'sg_0148.png', 'sg_0191.png'
+    ];
+    
+    const TEXTURES_FOLDER = 'Textures/';
+    const ASSETS_FOLDER = 'Spec_Geo_Assets/';
 
-    document.addEventListener('mouseout', () => {
-      if(!isTouch) cursorGlow.style.opacity = '0';
-    });
-
-    // Mobile: Touch with Pressure
-    document.addEventListener('touchstart', handleTouch, {passive: false});
-    document.addEventListener('touchmove', handleTouch, {passive: false});
-    document.addEventListener('touchend', () => {
-      cursorGlow.style.opacity = '0';
-    });
-
-    function handleTouch(e) {
-      isTouch = true;
-      const touch = e.touches[0];
-      if(!touch) return;
-
-      cursorGlow.style.opacity = '1';
-      cursorGlow.style.left = touch.clientX + 'px';
-      cursorGlow.style.top = touch.clientY + 'px';
-
-      let force = touch.force || 0.5;
-      if(force === 0) force = 0.5;
-      const scale = 1 + (force * 2.5);
-      cursorGlow.style.transform = `translate(-50%, -50%) scale(${scale})`;
-    }
-
-    /* ---------------- UI UTILS ---------------- */
-    function toggleAccordion(id) {
-      const targetItem = document.getElementById(id);
-      if (targetItem.classList.contains('disabled')) return;
-      
-      const isMobile = window.innerWidth <= 900;
-
-      // AUTO-COLLAPSE: Close others if opening new one
-      if (!targetItem.classList.contains('active')) {
-          const allItems = document.querySelectorAll('.accordion-item');
-          allItems.forEach(item => {
-              if (item.id !== id && item.classList.contains('active')) {
-                  item.classList.remove('active');
-                  item.querySelector('.accordion-body').style.maxHeight = null;
-              }
-          });
-      }
-
-      const body = targetItem.querySelector('.accordion-body');
-      const isActive = targetItem.classList.contains('active');
-      
-      if (!isActive) {
-        targetItem.classList.add('active');
-        body.style.maxHeight = body.scrollHeight + "px";
-        
-        if (isMobile) {
-            setTimeout(() => {
-                targetItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 300);
-        }
-
-      } else {
-        targetItem.classList.remove('active');
-        body.style.maxHeight = null;
-      }
-    }
-
-    function openAccordion(id) {
-        const item = document.getElementById(id);
-        if(!item.classList.contains('active')) toggleAccordion(id);
-    }
-
-    function updateVal(id, val) {
-        document.getElementById('val-'+id).textContent = val;
-    }
-
-    /* ---------------- ASSETS ---------------- */
-    const ASSET_PATH = 'Spec_Geo_Assets/';
-    const LS_KEY = 'talisman_custom_assets_v2';
-
-    /* ---------------- STATE ---------------- */
+    // --- SYSTEM ---
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     
+    // Blend modes for texture layering
+    const BLEND_MODES = ['multiply', 'overlay', 'soft-light', 'hard-light', 'screen', 'darken'];
+
     let state = {
-      talismanOutline: [],
-      cavities: [], 
-      placedAssets: {}, 
+      talismanOutline: [], cavities: [], placedAssets: {}, 
       images: {}, 
-      customAssetsData: [], 
-      textures: [], 
-      activeTextures: [], 
-      noiseCache: [],
-      intentionText: "",
-      selectedAssetKey: null,
-      activeCavityId: null,
-      contourSeed: 0
+      loadedTextures: [], 
+      activeTextureStack: [], 
+      intentionText: "", selectedAssetKey: null, activeCavityId: null, contourSeed: 0
     };
 
-    function initNoise() {
-      state.noiseCache = new Float32Array(2048);
-      for(let i=0; i<2048; i++) state.noiseCache[i] = Math.random();
+    // --- CURSOR ---
+    const cursorGlow = document.getElementById('cursor-glow');
+    document.addEventListener('mousemove', (e) => {
+      cursorGlow.style.left = e.clientX + 'px'; cursorGlow.style.top = e.clientY + 'px';
+    });
+
+    // --- UTILS ---
+    function toggleAccordion(id) {
+      const item = document.getElementById(id);
+      if(item.classList.contains('disabled')) return;
+      const isActive = item.classList.contains('active');
+      if(!isActive) {
+          document.querySelectorAll('.accordion-item').forEach(el => {
+              el.classList.remove('active'); el.querySelector('.accordion-body').style.maxHeight = null;
+          });
+          item.classList.add('active');
+          const body = item.querySelector('.accordion-body');
+          body.style.maxHeight = body.scrollHeight + "px";
+      } else {
+          item.classList.remove('active');
+          item.querySelector('.accordion-body').style.maxHeight = null;
+      }
     }
     
-    function noise(x) {
-      const i = Math.floor(x);
-      const f = x - i;
-      const w = f * f * (3 - 2 * f);
-      const idx = i & 2047;
-      const idx2 = (i+1) & 2047;
-      return state.noiseCache[idx] * (1 - w) + state.noiseCache[idx2] * w;
-    }
-
-    /* ---------------- GEOMETRY & MATH ---------------- */
+    function updateVal(id, val) { document.getElementById('val-'+id).textContent = val; }
 
     function smoothPoints(points, iterations=1) {
       let current = points;
@@ -530,7 +286,7 @@
       }
       return inside;
     }
-
+    
     function getBoundingBox(points) {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         points.forEach(p => {
@@ -540,468 +296,278 @@
         return { width: maxX - minX, height: maxY - minY, cx: minX + (maxX - minX)/2, cy: minY + (maxY - minY)/2 };
     }
 
-    /* ---------------- GENERATION LOGIC ---------------- */
-
-    function generateCavityShape(cx, cy, avgSize, seedOffset) {
-      const points = [];
-      const steps = 40; 
-      const isOval = Math.random() > 0.4;
-      const stretchX = isOval ? 0.7 + Math.random() * 0.5 : 1;
-      const stretchY = isOval ? 0.7 + Math.random() * 0.5 : 1;
-      const rotation = Math.random() * Math.PI;
-
+    // --- GENERATION ---
+    function generateCavityShape(cx, cy, avgSize) {
+      const points = []; const steps = 40; 
+      const stretch = 0.7 + Math.random() * 0.5;
       for (let i = 0; i < steps; i++) {
         const theta = (i / steps) * Math.PI * 2;
-        let rx = Math.cos(theta) * avgSize * stretchX;
-        let ry = Math.sin(theta) * avgSize * stretchY;
-        
-        if(isOval) {
-            const rotX = rx * Math.cos(rotation) - ry * Math.sin(rotation);
-            const rotY = rx * Math.sin(rotation) + ry * Math.cos(rotation);
-            rx = rotX; ry = rotY;
-        }
-
-        const n = noise(i * 0.5 + seedOffset);
-        const distortion = 0.8 + (n * 0.4); 
-        points.push({ x: cx + rx * distortion, y: cy + ry * distortion });
+        const r = avgSize * (0.8 + Math.random() * 0.4);
+        points.push({ x: cx + Math.cos(theta) * r, y: cy + Math.sin(theta) * r * stretch });
       }
       return smoothPoints(points, 2);
     }
 
-    function getPhoneRadius(angle, w, h) {
-        const n = 4.5; 
-        const a = w/2;
-        const b = h/2;
-        const cosT = Math.abs(Math.cos(angle));
-        const sinT = Math.abs(Math.sin(angle));
-        const r = Math.pow( Math.pow(cosT/a, n) + Math.pow(sinT/b, n), -1/n );
-        return r;
-    }
-
-    function getMaxCavityReach(cx, cy, angle) {
-        let maxR = 0;
-        const cosA = Math.cos(angle);
-        const sinA = Math.sin(angle);
-        
-        state.cavities.forEach(cavity => {
-            cavity.shape.forEach(pt => {
-                const dx = pt.x - cx;
-                const dy = pt.y - cy;
-                const proj = dx * cosA + dy * sinA;
-                const ptAngle = Math.atan2(dy, dx);
-                let diff = Math.abs(ptAngle - angle);
-                if(diff > Math.PI) diff = Math.PI*2 - diff;
-                if (diff < Math.PI / 3) { 
-                     if (proj > maxR) maxR = proj;
-                }
-            });
-        });
-        return maxR;
-    }
-
     function updateContourOnly() {
         const erosion = parseFloat(document.getElementById('roughness').value);
-        
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2;
-        
-        const margin = 60;
-        const phoneHeight = canvas.height - (margin * 2);
-        const phoneWidth = phoneHeight * 0.56; 
-        
-        const absoluteMinEdgeDistance = 25; 
-        const erosionPadding = 40; 
-        const minCoreSize = 100;
-        
+        const cx = canvas.width / 2, cy = canvas.height / 2;
+        const w = 350, h = 600;
         const points = [];
-        const steps = 240;
-
-        for (let i = 0; i < steps; i++) {
-            const angle = (i / steps) * Math.PI * 2;
-            
-            let maxR = getPhoneRadius(angle, phoneWidth, phoneHeight);
-            const baseShapeNoise = noise(i * 0.02 + state.contourSeed * 0.5) - 0.5;
-            maxR += baseShapeNoise * (maxR * 0.25);
-
-            const cavityReach = getMaxCavityReach(cx, cy, angle);
-            
-            let erosionTargetR = cavityReach + erosionPadding;
-            erosionTargetR = Math.max(erosionTargetR, minCoreSize);
-            const absoluteHardLimitR = cavityReach + absoluteMinEdgeDistance;
-            
-            if (maxR < erosionTargetR + 20) maxR = erosionTargetR + 20;
-
-            let finalR = maxR * (1 - erosion) + erosionTargetR * erosion;
-            
-            const noiseScale = 10 + (erosion * 30); 
-            const nVal = noise(i * 0.15 + state.contourSeed) - 0.5; 
-            finalR += nVal * noiseScale;
-
-            if (finalR < absoluteHardLimitR) finalR = absoluteHardLimitR;
-
-            points.push({
-                x: cx + Math.cos(angle) * finalR,
-                y: cy + Math.sin(angle) * finalR
-            });
-        }
         
+        for (let i = 0; i < 200; i++) {
+            const a = (i / 200) * Math.PI * 2;
+            let r = Math.pow(Math.pow(Math.abs(Math.cos(a))/(w), 4) + Math.pow(Math.abs(Math.sin(a))/(h), 4), -1/4);
+            const noise = Math.sin(i * 0.2 + state.contourSeed) * 20;
+            const erosionFactor = (Math.random() - 0.5) * (erosion * 100);
+            points.push({ x: cx + Math.cos(a) * (r + noise - erosionFactor), y: cy + Math.sin(a) * (r + noise - erosionFactor) });
+        }
         state.talismanOutline = smoothPoints(points, 3);
         render();
     }
-
-    function generateFullTalisman() {
-        initNoise();
-        const numCavities = parseInt(document.getElementById('windows').value);
-        
-        state.cavities = [];
-        state.placedAssets = {}; 
-        state.activeCavityId = null;
-        state.contourSeed = Math.random() * 100; 
-        updateTuningUI();
-
-        state.activeTextures = [];
-
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2;
-        
-        const spawnH = (canvas.height * 0.85) * 0.80; 
-        const spawnW = (spawnH * 0.56) * 0.70; 
-        const sizeFactor = Math.max(60, 260 - (numCavities * 22)); 
-
-        for(let i=0; i<numCavities; i++) {
-            let placed = false;
-            let attempts = 0;
-            let currentSize = sizeFactor + (Math.random() * 40 - 20); 
-            
-            while(!placed) {
-                attempts++;
-                if (attempts > 50) currentSize *= 0.98;
-                if (attempts > 200) currentSize *= 0.98; 
-                if (currentSize < 20) currentSize = 20; 
-
-                // Safety Break to prevent infinite loop / freezing
-                if (attempts > 1000) { 
-                    break; 
-                }
-
-                const wx = (cx - spawnW/2) + Math.random() * spawnW;
-                const wy = (cy - spawnH/2) + Math.random() * spawnH;
-                
-                let overlapping = false;
-                for(let c of state.cavities) {
-                    const dist = Math.hypot(c.x - wx, c.y - wy);
-                    const minDist = (c.size + currentSize) * 1.1; 
-                    if(dist < minDist) {
-                        overlapping = true; 
-                        break;
-                    }
-                }
-
-                if(!overlapping) {
-                    const shape = generateCavityShape(wx, wy, currentSize, Math.random() * 500);
-                    state.cavities.push({ id: Date.now() + i, x: wx, y: wy, size: currentSize, shape: shape });
-                    placed = true;
-                }
-            }
+    
+    // --- TEXTURE MIXER ---
+    function generateTextureStack() {
+        if (state.loadedTextures.length === 0) {
+            state.activeTextureStack = [];
+            return;
         }
 
+        const stack = [];
+        // Pick 2 to 3 layers randomly
+        const layersCount = 2 + Math.floor(Math.random() * 2); 
+        
+        for(let i=0; i<layersCount; i++) {
+            const randTex = state.loadedTextures[Math.floor(Math.random() * state.loadedTextures.length)];
+            const randMode = BLEND_MODES[Math.floor(Math.random() * BLEND_MODES.length)];
+            const randOpacity = 0.3 + Math.random() * 0.5;
+            
+            stack.push({
+                img: randTex,
+                mode: randMode,
+                opacity: randOpacity
+            });
+        }
+        state.activeTextureStack = stack;
+    }
+
+    function generateFullTalisman() {
+        state.contourSeed = Math.random() * 100;
+        generateTextureStack();
+
+        const num = parseInt(document.getElementById('windows').value);
+        state.cavities = [];
+        
+        const cx = canvas.width / 2, cy = canvas.height / 2;
+        for(let i=0; i<num; i++) {
+            let placed = false, attempts = 0;
+            while(!placed && attempts < 100) {
+                const wx = cx + (Math.random()-0.5)*400;
+                const wy = cy + (Math.random()-0.5)*800;
+                const size = 60 + Math.random()*40;
+                const safe = state.cavities.every(c => Math.hypot(c.x-wx, c.y-wy) > (c.size+size));
+                if(safe) {
+                    state.cavities.push({ id: Date.now()+i, x: wx, y: wy, size: size, shape: generateCavityShape(wx, wy, size) });
+                    placed = true;
+                }
+                attempts++;
+            }
+        }
         updateContourOnly();
     }
 
-    /* ---------------- RENDER ---------------- */
-
+    // --- RENDER ---
     function render() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       if (state.talismanOutline.length === 0) return;
       const pts = state.talismanOutline;
 
-      // 1. Drop Shadow
+      // 1. Shadow
+      ctx.save(); ctx.translate(15, 30); ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.filter = 'blur(20px)';
+      ctx.beginPath(); pts.forEach((p,i) => i==0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+      ctx.fill(); ctx.restore();
+
+      // 2. Stone Body & Texture Stacking
       ctx.save();
-      ctx.translate(15, 30);
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.filter = 'blur(25px)';
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-      ctx.closePath();
-      ctx.fill();
+      ctx.beginPath(); pts.forEach((p,i) => i==0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+      ctx.clip();
+      
+      // Base Color
+      ctx.fillStyle = '#444'; ctx.fillRect(0,0,canvas.width, canvas.height);
+      
+      // Apply Texture Stack
+      if(state.activeTextureStack.length > 0) {
+          state.activeTextureStack.forEach(layer => {
+              ctx.globalCompositeOperation = layer.mode;
+              ctx.globalAlpha = layer.opacity;
+              ctx.drawImage(layer.img, 0, 0, canvas.width, canvas.height);
+          });
+      } else {
+          // Fallback if no textures found
+          const grad = ctx.createRadialGradient(canvas.width/2-100, canvas.height/2-100, 50, canvas.width/2, canvas.height/2, 800);
+          grad.addColorStop(0, '#666'); grad.addColorStop(1, '#222');
+          ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width, canvas.height);
+      }
+      
+      // Reset
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1.0;
+      
+      // Edge Shadow Vignette
+      const gradV = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 300, canvas.width/2, canvas.height/2, 800);
+      gradV.addColorStop(0, 'rgba(0,0,0,0)'); gradV.addColorStop(1, 'rgba(0,0,0,0.8)');
+      ctx.fillStyle = gradV; ctx.fillRect(0,0,canvas.width, canvas.height);
+
       ctx.restore();
 
-      // 2. Stone Base
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-      ctx.closePath();
-      ctx.clip(); 
-      
-      // Slightly lighter grey for better visibility against black bg
-      ctx.fillStyle = '#555'; 
-      ctx.fillRect(0,0,canvas.width, canvas.height);
-      
-      ctx.globalAlpha = 1.0; 
-      
-      // 3. Lighting (Inside the clip)
-      ctx.globalCompositeOperation = 'overlay';
-      const bbox = getBoundingBox(pts);
-      const grad = ctx.createRadialGradient(
-          bbox.cx - bbox.width*0.2, bbox.cy - bbox.height*0.2, 50,
-          bbox.cx, bbox.cy, bbox.height * 0.9
-      );
-      grad.addColorStop(0, 'rgba(255, 255, 255, 0.4)'); 
-      grad.addColorStop(0.5, 'rgba(128, 128, 128, 0.0)');
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0.8)');        
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.restore(); // Restore clip and composite
-
-      // 4. Outline Stroke
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.restore();
-
-      // 5. Cavities
-      state.cavities.forEach(cavity => {
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
-        for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
-        ctx.closePath();
-        
-        ctx.fillStyle = '#050505';
-        ctx.fill();
-        
-        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        
-        if (state.activeCavityId === cavity.id) {
-            ctx.strokeStyle = '#8e44ad';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-        ctx.restore();
-
-        // 6. Assets
-        const assetData = state.placedAssets[cavity.id];
-        if (assetData && state.images[assetData.key]) {
-            const img = state.images[assetData.key];
-            const cBox = getBoundingBox(cavity.shape);
-            
-            const fitScaleX = (cBox.width * 0.7) / img.width;
-            const fitScaleY = (cBox.height * 0.7) / img.height;
-            const baseScale = Math.min(fitScaleX, fitScaleY);
-            const finalScale = baseScale * assetData.scale;
-            
-            const drawW = img.width * finalScale;
-            const drawH = img.height * finalScale;
-            
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(cavity.shape[0].x, cavity.shape[0].y);
-            for(let p of cavity.shape) ctx.lineTo(p.x, p.y);
-            ctx.clip(); 
-            
-            ctx.translate(cBox.cx, cBox.cy);
-            ctx.rotate(assetData.rot * Math.PI / 180);
-            
-            ctx.globalAlpha = 0.9;
-            ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
-            
-            ctx.globalCompositeOperation = 'multiply';
-            ctx.fillStyle = 'rgba(0,0,0,0.4)';
-            ctx.fillRect(-drawW/2, -drawH/2, drawW, drawH);
-            ctx.restore();
-        }
+      // 3. Cavities
+      state.cavities.forEach(c => {
+         ctx.save();
+         ctx.beginPath(); c.shape.forEach((p,i) => i==0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+         ctx.fillStyle = '#050505'; ctx.fill();
+         ctx.strokeStyle = (state.activeCavityId === c.id) ? '#8e44ad' : 'rgba(255,255,255,0.2)';
+         ctx.lineWidth = (state.activeCavityId === c.id) ? 3 : 1;
+         ctx.stroke();
+         
+         const asset = state.placedAssets[c.id];
+         if(asset && state.images[asset.key]) {
+             ctx.clip();
+             const img = state.images[asset.key];
+             const bounds = getBoundingBox(c.shape);
+             const scale = Math.min(bounds.width/img.width, bounds.height/img.height) * asset.scale * 0.8;
+             
+             ctx.translate(bounds.cx, bounds.cy);
+             ctx.rotate(asset.rot * Math.PI/180);
+             ctx.drawImage(img, -img.width*scale/2, -img.height*scale/2, img.width*scale, img.height*scale);
+         }
+         ctx.restore();
       });
-
-      // 7. Text
+      
+      // 4. Intention Text (UPDATED FONT)
       if(state.intentionText) {
-          ctx.font = '16px Helvetica, Arial, sans-serif';
-          ctx.fillStyle = '#666'; 
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom'; 
-          ctx.letterSpacing = '2px';
+          // 3. APPLY FONT TO CANVAS TEXT
+          ctx.font = '24px "Stylish", sans-serif'; 
+          ctx.fillStyle = '#aaa'; 
+          ctx.textAlign = 'center'; 
           ctx.fillText(state.intentionText.toUpperCase(), canvas.width/2, canvas.height - 50);
       }
     }
 
-    /* ---------------- INTERACTION ---------------- */
-
-    function selectAsset(filename) {
-        state.selectedAssetKey = filename;
-        document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
-        const active = document.querySelector(`.asset-item[data-id="${filename}"]`);
-        if(active) active.classList.add('selected');
-    }
-
-    function handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const customId = 'custom_' + Date.now();
-        saveCustomAsset(customId, e.target.result);
-        loadSingleAsset(customId, e.target.result, true); 
-      };
-      reader.readAsDataURL(file);
-      event.target.value = ''; 
-    }
-
-    function saveCustomAsset(id, dataUrl) {
-        state.customAssetsData.push({ id: id, src: dataUrl });
-        try { localStorage.setItem(LS_KEY, JSON.stringify(state.customAssetsData)); } catch (e) {}
-    }
-
-    function updateTuningUI() {
-        const accItem = document.getElementById('acc-calibration');
-        const rotSlider = document.getElementById('sigilRot');
-        const scaleSlider = document.getElementById('sigilScale');
-        
-        if (state.activeCavityId && state.placedAssets[state.activeCavityId]) {
-            accItem.classList.remove('disabled');
-            const data = state.placedAssets[state.activeCavityId];
-            rotSlider.value = data.rot;
-            scaleSlider.value = data.scale;
-            document.getElementById('val-sigilRot').textContent = data.rot + '°';
-            document.getElementById('val-sigilScale').textContent = data.scale;
-            openAccordion('acc-calibration');
-        } else {
-            accItem.classList.add('disabled');
-            if(accItem.classList.contains('active')) toggleAccordion('acc-calibration');
-        }
-    }
-
-    document.getElementById('sigilRot').addEventListener('input', (e) => {
-        if(state.activeCavityId && state.placedAssets[state.activeCavityId]) {
-            state.placedAssets[state.activeCavityId].rot = parseInt(e.target.value);
-            document.getElementById('val-sigilRot').textContent = e.target.value + '°';
-            render();
-        }
-    });
-
-    document.getElementById('sigilScale').addEventListener('input', (e) => {
-        if(state.activeCavityId && state.placedAssets[state.activeCavityId]) {
-            state.placedAssets[state.activeCavityId].scale = parseFloat(e.target.value);
-            document.getElementById('val-sigilScale').textContent = e.target.value;
-            render();
-        }
-    });
-
-    // Intention Text
-    document.getElementById('intentionInput').addEventListener('input', (e) => {
-        state.intentionText = e.target.value;
-        render();
-    });
-
-    function handleCanvasInteraction(e) {
-      if(e.type === 'touchmove') {
-          // allow scroll
-      } else if (e.type !== 'touchstart') {
-          e.preventDefault(); 
-      }
-      
-      const rect = canvas.getBoundingClientRect();
-      let clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-      let clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-
-      const x = (clientX - rect.left) * (canvas.width / rect.width);
-      const y = (clientY - rect.top) * (canvas.height / rect.height);
-      
-      const target = state.cavities.find(c => isInside(x, y, c.shape));
-      
-      if (target) {
-          if (state.selectedAssetKey) {
-              state.placedAssets[target.id] = { key: state.selectedAssetKey, rot: 0, scale: 1.0 };
-              state.selectedAssetKey = null; 
-              document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
-          }
-          state.activeCavityId = target.id;
-          updateTuningUI();
-          render();
-      } else {
-          state.activeCavityId = null;
-          updateTuningUI();
-          render();
-      }
-    }
-    
-    // Attach Listeners
-    canvas.addEventListener('mousedown', handleCanvasInteraction);
-    canvas.addEventListener('touchstart', handleCanvasInteraction);
-
-    /* ---------------- EXPORT ---------------- */
-    function exportImage() {
-        const link = document.createElement('a');
-        link.download = 'talisman-v3.png';
-        link.href = canvas.toDataURL();
-        link.click();
-    }
-    
-    function clearAssets() {
-        state.placedAssets = {};
-        state.activeCavityId = null;
-        updateTuningUI();
-        render();
-    }
-
-    /* ---------------- ASSET LOADING ---------------- */
+    // --- ASSETS ---
     function loadSingleAsset(key, src, isCustom=false) {
         const img = new Image();
+        img.crossOrigin = "Anonymous"; 
         img.src = src;
         img.onload = () => {
             state.images[key] = img;
-            
             const div = document.createElement('div');
-            div.className = 'asset-item';
-            if(isCustom) div.classList.add('custom');
+            div.className = 'asset-item' + (isCustom ? ' custom' : '');
             div.dataset.id = key;
             div.onclick = () => selectAsset(key);
-            
-            const thumb = new Image();
-            thumb.src = src;
-            div.appendChild(thumb);
-            
+            div.innerHTML = `<img src="${src}">`;
             document.getElementById('assetGrid').appendChild(div);
         };
     }
 
     function initAssets() {
-        // Generate placeholders instantly
-        const colors = ['#5DADE2', '#AF7AC5', '#F1948A', '#F7DC6F', '#58D68D', '#CACFD2'];
-        for(let i=0; i<12; i++) {
-            const canvasP = document.createElement('canvas');
-            canvasP.width = 100; canvasP.height = 100;
-            const ctxP = canvasP.getContext('2d');
-            ctxP.fillStyle = colors[i % colors.length];
-            ctxP.beginPath(); ctxP.arc(50,50,40,0,Math.PI*2); ctxP.fill();
-            ctxP.fillStyle = '#fff';
-            ctxP.font = '30px Arial'; ctxP.textAlign = 'center'; 
-            ctxP.fillText("?", 50, 60);
-            
-            const key = 'builtin_'+i;
-            loadSingleAsset(key, canvasP.toDataURL());
-        }
+        // 1. Load TEXTURES
+        TEXTURE_FILENAMES.forEach(filename => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = TEXTURES_FOLDER + filename;
+            img.onload = () => {
+                state.loadedTextures.push(img);
+                if(state.loadedTextures.length === 1) generateTextureStack(); render();
+            };
+        });
+        
+        // 2. Load SIGILS
+        SIGIL_FILENAMES.forEach((filename, i) => {
+            loadSingleAsset('sigil_'+i, ASSETS_FOLDER + filename);
+        });
 
+        // 3. Load Saved Customs
         try {
-            const saved = localStorage.getItem(LS_KEY);
-            if(saved) {
-                const arr = JSON.parse(saved);
-                arr.forEach(item => loadSingleAsset(item.id, item.src, true));
-            }
-        } catch(e) {}
+            const saved = localStorage.getItem('talisman_custom_v3');
+            if(saved) JSON.parse(saved).forEach(item => loadSingleAsset(item.id, item.src, true));
+        } catch(e){}
+    }
+    
+    // --- INTERACTION ---
+    function selectAsset(key) {
+        state.selectedAssetKey = key;
+        document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
+        const active = document.querySelector(`.asset-item[data-id="${key}"]`);
+        if(active) active.classList.add('selected');
     }
 
-    /* ---------------- MAIN INIT ---------------- */
-    // Trigger immediately (no window.onload wait)
+    canvas.addEventListener('mousedown', handleInteract);
+    canvas.addEventListener('touchstart', handleInteract);
+    
+    function handleInteract(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+        const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+        const x = (clientX - rect.left) * (canvas.width / rect.width);
+        const y = (clientY - rect.top) * (canvas.height / rect.height);
+
+        const hit = state.cavities.find(c => isInside(x, y, c.shape));
+        if(hit) {
+            if(state.selectedAssetKey) {
+                state.placedAssets[hit.id] = { key: state.selectedAssetKey, rot: 0, scale: 1.0 };
+                render();
+            }
+            state.activeCavityId = hit.id;
+            const acc = document.getElementById('acc-calibration');
+            acc.classList.remove('disabled');
+            if(!acc.classList.contains('active')) toggleAccordion('acc-calibration');
+            render();
+        } else {
+            state.activeCavityId = null;
+            render();
+        }
+    }
+    
+    document.getElementById('sigilRot').addEventListener('input', (e) => {
+        if(state.activeCavityId && state.placedAssets[state.activeCavityId]) {
+            state.placedAssets[state.activeCavityId].rot = parseInt(e.target.value); render();
+        }
+    });
+    document.getElementById('sigilScale').addEventListener('input', (e) => {
+        if(state.activeCavityId && state.placedAssets[state.activeCavityId]) {
+            state.placedAssets[state.activeCavityId].scale = parseFloat(e.target.value); render();
+        }
+    });
+    document.getElementById('intentionInput').addEventListener('input', (e) => {
+        state.intentionText = e.target.value; render();
+    });
+    
+    function handleFileUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const id = 'custom_' + Date.now();
+            loadSingleAsset(id, evt.target.result, true);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function exportImage() {
+        const link = document.createElement('a');
+        link.download = 'talisman.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+    
+    function clearAssets() { state.placedAssets = {}; render(); }
+
     initAssets();
     generateFullTalisman();
+
+    // Check if the font loads slowly and re-render once active
+    document.fonts.ready.then(function() {
+      render();
+    });
 
   </script>
 </body>
