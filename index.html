@@ -15,11 +15,11 @@
       --bg-color: #000000;
       
       /* [NOTE] SIDEBAR PALETTE */
-      --sidebar-bg: #111111;       
-      --sidebar-surface: #1a1a1a;  
+      --sidebar-bg: #111111;        
+      --sidebar-surface: #1a1a1a;   
       --text-main: #cccccc;        
-      --text-muted: #777777;       
-      --border-color: #333333;     
+      --text-muted: #777777;        
+      --border-color: #333333;      
       --highlight: #8e44ad;
       --accent: #555; 
     }
@@ -53,14 +53,21 @@
     
     .header {
       background: transparent; 
-      padding: 15px 10px;
+      padding: 10px 10px; /* Reduced padding */
       display: flex; 
       justify-content: center; 
       align-items: center;
       border-bottom: none;
-      flex-shrink: 0; z-index: 10; color: #B6B5B5
+      flex-shrink: 0; z-index: 10; color: #B6B5B5;
     }
-    .header h1 { font-size: 1.5rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 400;}
+    /* UPDATED: Clamp font size ensures it scales with width but has min/max limits */
+    .header h1 { 
+        font-size: clamp(1rem, 5vw, 1.5rem); 
+        letter-spacing: 1px; 
+        text-transform: uppercase; 
+        font-weight: 400;
+        white-space: nowrap; /* Keeps it on one line */
+    }
     
     .main { display: flex; flex: 1; overflow: hidden; position: relative; flex-direction: row; }
     
@@ -106,29 +113,32 @@
     
     .sidebar-content { flex: 1; overflow-y: auto; cursor: default; padding-right: 0; }
 
+    /* UPDATED: Footer now has no border-top to blend in, and less padding */
     .sidebar-footer {
         font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif";
-        padding: 20px;
+        padding: 15px 20px;
         font-size: 0.75rem;
         color: var(--text-muted);
-        border-top: 1px solid var(--border-color);
         line-height: 1.2;
         background: var(--sidebar-bg);
+        margin-top: 10px; /* Separation from last item */
     }
 
     .accordion-item { border-bottom: 1px solid var(--border-color); background: var(--sidebar-surface); }
     
+    /* UPDATED: Tighter spacing for Accordion Header */
     .accordion-header {
       width: 100%; text-align: left; 
       background: var(--sidebar-surface);
-      padding: 20px;
+      padding: 12px 15px; /* Reduced from 20px */
       border: none; outline: none; cursor: pointer;
       font-family: 'Stylish', sans-serif;
-      font-size: 1.1rem; 
+      font-size: 1.0rem; /* Slightly smaller font */
       font-weight: 300; letter-spacing: 1px; 
       color: #eee;
       display: flex; justify-content: space-between; align-items: center;
-      text-transform: uppercase; min-height: 60px; 
+      text-transform: uppercase; 
+      min-height: 45px; /* Reduced from 60px */
     }
     .accordion-header:hover { background: #252525; }
     .accordion-header::after { content: '+'; font-size: 1.2rem; font-weight: 300; color: #666; }
@@ -139,39 +149,41 @@
         transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
         background: var(--sidebar-bg);
     }
-    .accordion-inner { padding: 20px; border-top: 1px solid var(--border-color); }
+    
+    /* UPDATED: Tighter spacing for Accordion Inner Content */
+    .accordion-inner { padding: 12px; border-top: 1px solid var(--border-color); }
     .accordion-item.disabled { pointer-events: none; opacity: 0.5; }
 
     /* --- FORM ELEMENTS --- */
     .text-input { 
-        width: 100%; padding: 12px; 
+        width: 100%; padding: 10px; 
         background: #000;
         border: 1px solid #444; 
         color: #fff;
         border-radius: 6px; 
-        font-family: 'Stylish', sans-serif; font-size: 1.1rem; 
+        font-family: 'Stylish', sans-serif; font-size: 1.0rem; 
     }
     .text-input:focus { outline: none; border-color: var(--highlight); }
 
-    .slider-row { margin-bottom: 15px; }
-    .slider-row label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; color: #999;}
+    .slider-row { margin-bottom: 12px; }
+    .slider-row label { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9rem; color: #999;}
     input[type="range"] { width: 100%; accent-color: var(--highlight); height: 6px; cursor: pointer; background: #333; }
     
     .btn { 
-        width: 100%; padding: 12px; border: none; border-radius: 6px; 
-        font-family: 'Stylish', sans-serif; font-size: 1.1rem; 
-        cursor: pointer; text-transform: uppercase; margin-bottom: 10px; 
+        width: 100%; padding: 10px; border: none; border-radius: 6px; 
+        font-family: 'Stylish', sans-serif; font-size: 1.0rem; 
+        cursor: pointer; text-transform: uppercase; margin-bottom: 8px; 
     }
-    .btn-primary { background: #eee; color: #000; margin-top: 10px; } 
+    .btn-primary { background: #eee; color: #000; margin-top: 8px; } 
     .btn-primary:hover { background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
     
     .btn-secondary { background: #333; color: #ccc; border: 1px solid #444; }
     .btn-secondary:hover { background: #444; color: #fff; }
     
-    .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; margin-bottom: 15px; }
+    .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; margin-bottom: 12px; }
     .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
 
-    .assets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .assets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     
     .asset-item { 
         aspect-ratio: 1; 
@@ -276,11 +288,13 @@
               <button class="btn btn-secondary" onclick="clearAssets()" style="background:transparent; border:1px solid #444; color: #888;">Clear Sigils</button>
           </div></div>
         </div>
+
+        <div class="sidebar-footer">
+            Spirits of zero and one; touch the command key of the unseen to manifest fortune and desire through this digital talisman. Ever the Ordinal Solid guides direction and form. <br> <p style="text-align: right;">JULMstudios 2026</p> 
+        </div>
+
       </div>
       
-      <div class="sidebar-footer">
-          Spirits of zero and one; touch the command key of the unseen to manifest fortune and desire through this digital talisman. Ever the Ordinal Solid guides direction and form. <br> <p style="text-align: right;">JULMstudios 2026</p> 
-      </div>
     </div>
 
     <div class="canvas-area">
