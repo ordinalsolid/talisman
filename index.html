@@ -255,17 +255,22 @@
               <button class="btn btn-primary" onclick="generateFullTalisman()">Reform Talisman</button>
           </div></div>
         </div>
+<div class="accordion-item" id="acc-selection">
+  <button class="accordion-header" onclick="toggleAccordion('acc-selection')">III. Selection *:･ﾟ✧*:･ﾟ</button>
+  <div class="accordion-body"><div class="accordion-inner">
+      
+      <button class="btn btn-secondary" onclick="pasteFromClipboard()" style="margin-bottom: 8px; border: 1px dashed #666; color: #fff;">
+          + Paste Clipboard / Sticker
+      </button>
 
-        <div class="accordion-item" id="acc-selection">
-          <button class="accordion-header" onclick="toggleAccordion('acc-selection')">III. Selection *:･ﾟ✧*:･ﾟ</button>
-          <div class="accordion-body"><div class="accordion-inner">
-              <div class="upload-btn-wrapper">
-                <button class="btn btn-secondary">+ Upload Custom Sigil</button>
-                <input type="file" id="fileUpload" accept="image/*" onchange="handleFileUpload(event)" />
-              </div>
-              <div class="assets-grid" id="assetGrid"></div>
-          </div></div>
-        </div>
+      <div class="upload-btn-wrapper">
+        <button class="btn btn-secondary">+ Upload Custom Sigil</button>
+        <input type="file" id="fileUpload" accept="image/*" onchange="handleFileUpload(event)" />
+      </div>
+      <div class="assets-grid" id="assetGrid"></div>
+  </div></div>
+</div>
+        
 
         <div class="accordion-item disabled" id="acc-calibration">
           <button class="accordion-header" onclick="toggleAccordion('acc-calibration')">IV. Calibration</button>
@@ -294,7 +299,7 @@
     </div>
   </div>
 
-  <script>
+ <script>
     // --- CONFIGURATION ---
     
     // 1. TEXTURES
@@ -486,21 +491,38 @@
         state.activeTextureStack = stack;
     }
 
+   // --- 1. UPDATED GENERATOR (LARGER SIZES) ---
     function generateFullTalisman() {
         state.contourSeed = Math.random() * 100;
         generateTextureStack();
         const num = parseInt(document.getElementById('windows').value);
         state.chambers = []; 
         const cx = canvas.width / 2, cy = canvas.height / 2;
+        
         for(let i=0; i<num; i++) {
             let placed = false, attempts = 0;
-            while(!placed && attempts < 200) {
-                const wx = cx + (Math.random()-0.5)*360; 
-                const wy = cy + (Math.random()-0.5)*900;
-                const size = 45 + Math.random() * 90;
-                const safe = state.chambers.every(c => Math.hypot(c.x-wx, c.y-wy) > (c.size+size + 10));
+            // Increased attempts to 500 to help fit the larger shapes
+            while(!placed && attempts < 500) {
+                // Spread them out a bit more (380 width range, 950 height range)
+                const wx = cx + (Math.random()-0.5)*380; 
+                const wy = cy + (Math.random()-0.5)*950;
+                
+                // [CHANGED] Size logic:
+                // Old: 45 + random * 90 (Max ~135)
+                // New: 75 + random * 155 (Max ~230)
+                const size = 75 + Math.random() * 155;
+                
+                // Reduced padding (+5 instead of +10) to let them get cozy
+                const safe = state.chambers.every(c => Math.hypot(c.x-wx, c.y-wy) > (c.size+size + 5));
+                
                 if(safe) {
-                    state.chambers.push({ id: Date.now()+i, x: wx, y: wy, size: size, shape: generateChamberShape(wx, wy, size) });
+                    state.chambers.push({ 
+                        id: Date.now()+i, 
+                        x: wx, 
+                        y: wy, 
+                        size: size, 
+                        shape: generateChamberShape(wx, wy, size) 
+                    });
                     placed = true;
                 }
                 attempts++;
@@ -715,6 +737,46 @@
         state.intentionText = e.target.value; render();
     });
     
+	 // --- NEW CLIPBOARD FUNCTION ---
+async function pasteFromClipboard() {
+    try {
+        // This asks the browser for clipboard access
+        // On iPhone, a system popup will ask "Allow Paste?"
+        const clipboardItems = await navigator.clipboard.read();
+        
+        let foundImage = false;
+
+        for (const item of clipboardItems) {
+            // We only care about images (png, jpeg, etc.)
+            const imageType = item.types.find(type => type.startsWith('image/'));
+            
+            if (imageType) {
+                foundImage = true;
+                const blob = await item.getType(imageType);
+                
+                // Convert the raw blob into something we can draw
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const id = 'sticker_' + Date.now();
+                    // Load it as a "custom" asset (true) but not a "sigil" (false)
+                    // so colors don't get inverted
+                    loadSingleAsset(id, e.target.result, true, false);
+                };
+                reader.readAsDataURL(blob);
+            }
+        }
+        
+        if (!foundImage) {
+            alert("No image found on clipboard! Copy a sticker first.");
+        }
+
+    } catch (err) {
+        console.error(err);
+        // This error happens if the user clicks "Don't Allow" or if the browser is old
+        alert("Could not access clipboard. Please ensure you allow pasting.");
+    }
+}
+	 
     function handleFileUpload(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -764,7 +826,35 @@
     document.fonts.ready.then(function() {
       render();
     });
-
+	 
+// --- 2. NEW PASTE FUNCTION (FOR IPHONE) ---
+    async function pasteFromClipboard() {
+        try {
+            // This triggers the "Allow Paste?" system popup on iPhone
+            const clipboardItems = await navigator.clipboard.read();
+            let found = false;
+            
+            for (const item of clipboardItems) {
+                // Look for images
+                const type = item.types.find(t => t.startsWith('image/'));
+                if (type) {
+                    found = true;
+                    const blob = await item.getType(type);
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const id = 'sticker_' + Date.now();
+                        // Load as Custom (True), Not Sigil (False)
+                        loadSingleAsset(id, e.target.result, true, false);
+                    };
+                    reader.readAsDataURL(blob);
+                }
+            }
+            if(!found) alert("No sticker or image found on clipboard.");
+            
+        } catch (err) {
+            console.error(err);
+            alert("Clipboard access denied. Please tap 'Allow' when prompted.");
+        }
+    }
   </script>
-</body>
 </html>
