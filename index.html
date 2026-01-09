@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Talisman Agency</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Talisman For Devices</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,11 +17,17 @@
       /* [NOTE] SIDEBAR PALETTE */
       --sidebar-bg: #111111;        
       --sidebar-surface: #1a1a1a;   
-      --text-main: #cccccc;        
+      --text-main: #cccccc;         
       --text-muted: #777777;        
       --border-color: #333333;      
       --highlight: #8e44ad;
       --accent: #555; 
+
+      /* SAFE AREA VARIABLES */
+      --safe-top: env(safe-area-inset-top, 20px);
+      --safe-bottom: env(safe-area-inset-bottom, 20px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -53,20 +59,24 @@
     
     .header {
       background: transparent; 
-      padding: 10px 10px; /* Reduced padding */
+      padding-top: var(--safe-top); 
+      padding-bottom: 10px;
+      padding-left: max(10px, var(--safe-left));
+      padding-right: max(10px, var(--safe-right));
+      width: 100%; 
       display: flex; 
       justify-content: center; 
       align-items: center;
       border-bottom: none;
       flex-shrink: 0; z-index: 10; color: #B6B5B5;
     }
-    /* UPDATED: Clamp font size ensures it scales with width but has min/max limits */
+
     .header h1 { 
         font-size: clamp(1rem, 5vw, 1.5rem); 
         letter-spacing: 1px; 
         text-transform: uppercase; 
         font-weight: 400;
-        white-space: nowrap; /* Keeps it on one line */
+        white-space: nowrap; 
     }
     
     .main { display: flex; flex: 1; overflow: hidden; position: relative; flex-direction: row; }
@@ -76,69 +86,58 @@
       width: 360px;
       background: var(--sidebar-bg);
       color: var(--text-main);
-      
       margin: 10px 0 20px 20px;
       height: calc(100% - 30px);
-      
       border-radius: 45px 25px 55px 30px / 30px 55px 25px 45px;
       transform: rotate(-0.5deg);
-      
-      /* [NOTE] FUZZINESS SETTINGS */
       box-shadow: 
         0 0 10px 1px var(--sidebar-bg), 
         0 20px 50px rgba(0,0,0,1); 
-      
       border: 1px solid #222; 
-      
       animation: morphBorder 6s ease-in-out infinite alternate;
-      
-      /* [NOTE] WOBBLY EDGE FILTER APPLIED HERE */
       filter: url(#wobbly); 
-      
       overflow: hidden; 
-      display: flex; flex-direction: column; flex-shrink: 0; z-index: 3; order: 1;
+      display: flex; 
+      flex-direction: column; 
+      flex-shrink: 0; z-index: 3; order: 1;
       position: relative;
     }
 
     @keyframes morphBorder {
-      0% { 
-        border-radius: 45px 25px 55px 30px / 30px 55px 25px 45px;
-        transform: rotate(-0.5deg);
-      }
-      100% { 
-        border-radius: 25px 55px 30px 45px / 55px 30px 45px 25px;
-        transform: rotate(0deg); 
-      }
+      0% { border-radius: 45px 25px 55px 30px / 30px 55px 25px 45px; transform: rotate(-0.5deg); }
+      100% { border-radius: 25px 55px 30px 45px / 55px 30px 45px 25px; transform: rotate(0deg); }
     }
     
     .sidebar-content { flex: 1; overflow-y: auto; cursor: default; padding-right: 0; }
 
-    /* UPDATED: Footer now has no border-top to blend in, and less padding */
     .sidebar-footer {
         font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif";
         padding: 15px 20px;
+        padding-bottom: max(15px, var(--safe-bottom)); 
+        padding-left: max(20px, var(--safe-left));
+        padding-right: max(20px, var(--safe-right));
         font-size: 0.75rem;
         color: var(--text-muted);
         line-height: 1.2;
         background: var(--sidebar-bg);
-        margin-top: 10px; /* Separation from last item */
+        border-top: 1px solid #222; 
+        flex-shrink: 0; 
     }
 
     .accordion-item { border-bottom: 1px solid var(--border-color); background: var(--sidebar-surface); }
     
-    /* UPDATED: Tighter spacing for Accordion Header */
     .accordion-header {
       width: 100%; text-align: left; 
       background: var(--sidebar-surface);
-      padding: 12px 15px; /* Reduced from 20px */
+      padding: 12px 15px; 
       border: none; outline: none; cursor: pointer;
       font-family: 'Stylish', sans-serif;
-      font-size: 1.0rem; /* Slightly smaller font */
+      font-size: 1.0rem; 
       font-weight: 300; letter-spacing: 1px; 
       color: #eee;
       display: flex; justify-content: space-between; align-items: center;
       text-transform: uppercase; 
-      min-height: 45px; /* Reduced from 60px */
+      min-height: 45px; 
     }
     .accordion-header:hover { background: #252525; }
     .accordion-header::after { content: '+'; font-size: 1.2rem; font-weight: 300; color: #666; }
@@ -150,18 +149,14 @@
         background: var(--sidebar-bg);
     }
     
-    /* UPDATED: Tighter spacing for Accordion Inner Content */
     .accordion-inner { padding: 12px; border-top: 1px solid var(--border-color); }
     .accordion-item.disabled { pointer-events: none; opacity: 0.5; }
 
     /* --- FORM ELEMENTS --- */
     .text-input { 
         width: 100%; padding: 10px; 
-        background: #000;
-        border: 1px solid #444; 
-        color: #fff;
-        border-radius: 6px; 
-        font-family: 'Stylish', sans-serif; font-size: 1.0rem; 
+        background: #000; border: 1px solid #444; color: #fff;
+        border-radius: 6px; font-family: 'Stylish', sans-serif; font-size: 1.0rem; 
     }
     .text-input:focus { outline: none; border-color: var(--highlight); }
 
@@ -176,7 +171,6 @@
     }
     .btn-primary { background: #eee; color: #000; margin-top: 8px; } 
     .btn-primary:hover { background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
-    
     .btn-secondary { background: #333; color: #ccc; border: 1px solid #444; }
     .btn-secondary:hover { background: #444; color: #fff; }
     
@@ -186,12 +180,12 @@
     .assets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     
     .asset-item { 
-        aspect-ratio: 1; 
-        background: #222; 
-        border: 1px solid #444; 
+        aspect-ratio: 1; background: #222; border: 1px solid #444; 
         border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; position: relative; 
     }
-    .asset-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: invert(0.1); } 
+    .asset-item img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+    /* Emojis don't need inversion, but sigils might. We apply a class if needed, or just keep generic. */
+    .asset-item.is-sigil img { filter: invert(0.1); } 
     .asset-item.selected { border-color: var(--highlight); background: #333; transform: scale(1.05); }
     
     /* --- CANVAS --- */
@@ -204,18 +198,17 @@
     /* --- MOBILE --- */
     @media (max-width: 900px) {
       .main { flex-direction: column; }
-      .header { position: sticky; top: 0; z-index: 1000; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #333; }
-      .canvas-area { height: 50vh; flex: none; order: 1; padding: 10px; cursor: auto;}
-      
-      .sidebar { 
-          width: 100%; flex: 1; margin: 0; 
-          border-radius: 0; 
-          height: auto; border-top: 1px solid #333; 
-          order: 2; animation: none; transform: none; 
-          box-shadow: none;
-          filter: none; /* Disable wobble on mobile for performance */
+      .header { 
+          position: sticky; top: 0; z-index: 1000; 
+          background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #333; 
       }
-      
+      .canvas-area { height: 50vh; flex: none; order: 1; padding: 10px; cursor: auto;}
+      .sidebar { 
+          width: 100%; flex: 1; margin: 0; border-radius: 0; 
+          height: auto; border-top: 1px solid #333; order: 2; 
+          animation: none; transform: none; box-shadow: none; filter: none; 
+          padding-left: var(--safe-left); padding-right: var(--safe-right);
+      }
       .assets-grid { grid-template-columns: repeat(5, 1fr); }
       #cursor-glow { display: none; } 
     }
@@ -233,11 +226,12 @@
   <div id="cursor-glow"></div>
 
   <div class="header">
-    <h1>*:･ﾟ✧*:･ﾟ Talisman for Devices <small>v. I.0</small>  *:･ﾟ✧*:･ﾟ</h1>
+    <h1>*:･ﾟ✧*:･ﾟ TELESMA <small>v. I.0</small>  *:･ﾟ✧*:･ﾟ</h1>
   </div>
   
   <div class="main">
     <div class="sidebar" id="sidebar">
+      
       <div class="sidebar-content">
         
         <div class="accordion-item" id="acc-intention">
@@ -251,7 +245,7 @@
           <button class="accordion-header" onclick="toggleAccordion('acc-formation')">II. Formation *. * ·:･ﾟ</button>
           <div class="accordion-body"><div class="accordion-inner">
               <div class="slider-row">
-                <label>Cavities <span id="val-windows">4</span></label>
+                <label>Chambers <span id="val-windows">4</span></label>
                 <input type="range" id="windows" min="1" max="8" value="4" oninput="updateVal('windows', this.value); generateFullTalisman()">
               </div>
               <div class="slider-row">
@@ -289,10 +283,8 @@
           </div></div>
         </div>
 
-        <div class="sidebar-footer">
-            Spirits of zero and one; touch the command key of the unseen to manifest fortune and desire through this digital talisman. Ever the Ordinal Solid guides direction and form. <br> <p style="text-align: right;">JULMstudios 2026</p> 
-        </div>
-
+      </div> <div class="sidebar-footer">
+          Spirits of zero and one; touch the command key of the unseen to manifest fortune and desire through this digital talisman. Ever the Ordinal Solid guides direction and form. <br> <p style="text-align: right;">JULMstudios 2026</p> 
       </div>
       
     </div>
@@ -315,13 +307,23 @@
         'texture25.png', 'texture26.png'
     ];
 
-    // 2. SIGILS
+    // 2. SIGILS (PNGs)
     const SIGIL_FILENAMES = [
         'sg_0001.png', 'sg_0008b.png', 'sg_0023c.png', 'sg_0047a.png', 'sg_0055d.png', 'sg_0056b.png','sg_0058d.png', 'sg_0063a.png', 'sg_0067.png', 'sg_0070.png','sg_0072.png', 'sg_0078a.png', 'sg_0078f.png', 'sg_0080b.png', 'sg_0080c.png', 'sg_0085a.png', 'sg_0085b.png', 'sg_0086a.png','sg_0096a.png', 'sg_0096b.png', 'sg_0096h.png', 'sg_0097b.png','sg_0104c.png', 'sg_0104g.png', 'sg_0148.png', 'sg_0191.png'
+    ];
+
+    // 3. EMOJI INVENTORY (Add as many as you want here; the sidebar will scroll)
+    const EMOJI_INVENTORY = [
+        '🧿', '🔮', '🌙', '⭐', '⚡', '👁️', '🕸️', '🐍',
+        '🦋', '💀', '🕯️', '🗝️', '🗡️', '🛡️', '🧬', '⚛️',
+        '🪐', '☄️', '🔥', '💧', '🌪️', '🧊', '⚓', '🧭', 
+        '🐉', '🪷', '⚜️', '🖤', '🩸', '💊', '🔋', '💾',
+        '👽', '🛸', '🗿', '🎪', '🎭', '🎨', '🧩', '🎲'
     ];
     
     const TEXTURES_FOLDER = 'Textures/';
     const ASSETS_FOLDER = 'Spec_Geo_Assets/';
+    const SHADOW_FILENAME = 'inner_shadow.png';
 
     // --- SYSTEM ---
     const canvas = document.getElementById('canvas');
@@ -330,11 +332,14 @@
     const BLEND_MODES = ['multiply', 'overlay', 'soft-light', 'hard-light', 'screen', 'darken', 'color-burn', 'exclusion'];
 
     let state = {
-      talismanOutline: [], cavities: [], placedAssets: {}, 
+      talismanOutline: [], 
+      chambers: [], 
+      placedAssets: {}, 
       images: {}, 
       loadedTextures: [], 
+      shadowImage: null,
       activeTextureStack: [], 
-      intentionText: "", selectedAssetKey: null, activeCavityId: null, contourSeed: 0
+      intentionText: "", selectedAssetKey: null, activeChamberId: null, contourSeed: 0
     };
 
     // --- CURSOR ---
@@ -397,9 +402,21 @@
         });
         return { width: maxX - minX, height: maxY - minY, cx: minX + (maxX - minX)/2, cy: minY + (maxY - minY)/2 };
     }
+    
+    function emojiToDataURL(emoji, size=128) {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = size;
+        tempCanvas.height = size;
+        const tCtx = tempCanvas.getContext('2d');
+        tCtx.font = `${size*0.75}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`; 
+        tCtx.textAlign = 'center';
+        tCtx.textBaseline = 'middle';
+        tCtx.fillText(emoji, size/2, size/2 + size*0.05);
+        return tempCanvas.toDataURL();
+    }
 
     // --- GENERATION ---
-    function generateCavityShape(cx, cy, avgSize) {
+    function generateChamberShape(cx, cy, avgSize) {
       const points = []; const steps = 40; 
       const stretch = 0.7 + Math.random() * 0.5;
       for (let i = 0; i < steps; i++) {
@@ -413,79 +430,57 @@
     function updateContourOnly() {
         const t = parseFloat(document.getElementById('roughness').value);
         const cx = canvas.width / 2, cy = canvas.height / 2;
-        
         const w = 390, h = 700; 
-
-        let allCavityPoints = [];
-        state.cavities.forEach(c => allCavityPoints.push(...c.shape));
-
+        let allChamberPoints = [];
+        state.chambers.forEach(c => allChamberPoints.push(...c.shape));
         const points = [];
         const resolution = 180;
         const padding = 50;
-
         for (let i = 0; i < resolution; i++) {
             const angle = (i / resolution) * Math.PI * 2;
             const cosA = Math.cos(angle);
             const sinA = Math.sin(angle);
-
             let rEllipse = Math.pow(Math.pow(Math.abs(cosA)/(w), 4) + Math.pow(Math.abs(sinA)/(h), 4), -1/4);
             rEllipse += Math.sin(i * 0.3 + state.contourSeed) * 15;
-
             let maxDist = 0;
-            allCavityPoints.forEach(p => {
+            allChamberPoints.forEach(p => {
                 const dx = p.x - cx;
                 const dy = p.y - cy;
                 const distAlongRay = dx * cosA + dy * sinA;
-                
                 const pAngle = Math.atan2(dy, dx);
                 let dAngle = Math.abs(pAngle - angle);
                 if (dAngle > Math.PI) dAngle = 2 * Math.PI - dAngle;
-
                 if (dAngle < 0.2) { 
                     const dist = Math.sqrt(dx*dx + dy*dy);
                     if (dist > maxDist) maxDist = dist;
                 }
             });
-
             let rWrap = maxDist > 0 ? maxDist + padding : 100; 
             if(rWrap < 100) rWrap = 100;
-
             let rFinal = rEllipse * (1 - t) + rWrap * t;
             if(rFinal < rWrap) rFinal = rWrap; 
-
             const x = cx + cosA * rFinal;
-            if(x < 5 || x > canvas.width - 5) {
-                 rFinal = (canvas.width/2 - 10) / Math.abs(cosA);
-            }
-
+            if(x < 5 || x > canvas.width - 5) { rFinal = (canvas.width/2 - 10) / Math.abs(cosA); }
             points.push({ x: cx + cosA * rFinal, y: cy + sinA * rFinal });
         }
-        
         state.talismanOutline = smoothPoints(points, 5);
         render();
     }
     
-    // --- TEXTURE MIXER ---
     function generateTextureStack() {
         if (state.loadedTextures.length === 0) {
             state.activeTextureStack = [];
             return;
         }
-
         const stack = [];
         const layersCount = 3 + Math.floor(Math.random() * 3);
-        
         for(let i=0; i<layersCount; i++) {
             const randTex = state.loadedTextures[Math.floor(Math.random() * state.loadedTextures.length)];
             const randMode = BLEND_MODES[Math.floor(Math.random() * BLEND_MODES.length)];
             const randOpacity = 0.2 + Math.random() * 0.6;
-            
             stack.push({
-                img: randTex,
-                mode: randMode,
-                opacity: randOpacity,
-                flipX: Math.random() > 0.5,
-                flipY: Math.random() > 0.5
+                img: randTex, mode: randMode, opacity: randOpacity,
+                flipX: Math.random() > 0.5, flipY: Math.random() > 0.5
             });
         }
         state.activeTextureStack = stack;
@@ -494,22 +489,18 @@
     function generateFullTalisman() {
         state.contourSeed = Math.random() * 100;
         generateTextureStack();
-
         const num = parseInt(document.getElementById('windows').value);
-        state.cavities = [];
-        
+        state.chambers = []; 
         const cx = canvas.width / 2, cy = canvas.height / 2;
         for(let i=0; i<num; i++) {
             let placed = false, attempts = 0;
             while(!placed && attempts < 200) {
                 const wx = cx + (Math.random()-0.5)*360; 
                 const wy = cy + (Math.random()-0.5)*900;
-                
                 const size = 45 + Math.random() * 90;
-                
-                const safe = state.cavities.every(c => Math.hypot(c.x-wx, c.y-wy) > (c.size+size + 10));
+                const safe = state.chambers.every(c => Math.hypot(c.x-wx, c.y-wy) > (c.size+size + 10));
                 if(safe) {
-                    state.cavities.push({ id: Date.now()+i, x: wx, y: wy, size: size, shape: generateCavityShape(wx, wy, size) });
+                    state.chambers.push({ id: Date.now()+i, x: wx, y: wy, size: size, shape: generateChamberShape(wx, wy, size) });
                     placed = true;
                 }
                 attempts++;
@@ -524,7 +515,7 @@
       if (state.talismanOutline.length === 0) return;
       const pts = state.talismanOutline;
 
-      // 1. Shadow
+      // 1. Shadow Under Talisman
       ctx.save(); ctx.translate(15, 30); ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.filter = 'blur(20px)';
       ctx.beginPath(); pts.forEach((p,i) => i==0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
       ctx.fill(); ctx.restore();
@@ -533,7 +524,6 @@
       ctx.save();
       ctx.beginPath(); pts.forEach((p,i) => i==0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
       ctx.clip();
-      
       ctx.fillStyle = '#2a2a2a'; ctx.fillRect(0,0,canvas.width, canvas.height);
       
       if(state.activeTextureStack.length > 0) {
@@ -549,6 +539,7 @@
               ctx.restore();
           });
       } else {
+          // Fallback if no textures loaded yet
           const grad = ctx.createRadialGradient(canvas.width/2-100, canvas.height/2-100, 50, canvas.width/2, canvas.height/2, 800);
           grad.addColorStop(0, '#666'); grad.addColorStop(1, '#222');
           ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width, canvas.height);
@@ -556,25 +547,27 @@
       
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1.0;
-      
       const gradV = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 300, canvas.width/2, canvas.height/2, 800);
       gradV.addColorStop(0, 'rgba(0,0,0,0)'); gradV.addColorStop(1, 'rgba(0,0,0,0.8)');
       ctx.fillStyle = gradV; ctx.fillRect(0,0,canvas.width, canvas.height);
 
       ctx.restore();
 
-      // 3. Cavities
-      state.cavities.forEach(c => {
+      // 3. Chambers
+      state.chambers.forEach(c => {
+         // A. The Hole Background
          ctx.save();
          ctx.beginPath(); c.shape.forEach((p,i) => i==0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
-         ctx.fillStyle = '#050505'; ctx.fill();
-         ctx.strokeStyle = (state.activeCavityId === c.id) ? '#8e44ad' : 'rgba(255,255,255,0.2)';
-         ctx.lineWidth = (state.activeCavityId === c.id) ? 3 : 1;
-         ctx.stroke();
+         ctx.closePath();
+         ctx.fillStyle = '#050505'; 
+         ctx.fill();
          
+         // B. The Asset
          const asset = state.placedAssets[c.id];
          if(asset && state.images[asset.key]) {
-             ctx.clip();
+             ctx.save();
+             ctx.clip(); // Clip to chamber
+             
              const img = state.images[asset.key];
              const bounds = getBoundingBox(c.shape);
              const scale = Math.min(bounds.width/img.width, bounds.height/img.height) * asset.scale * 0.8;
@@ -582,36 +575,64 @@
              ctx.translate(bounds.cx, bounds.cy);
              ctx.rotate(asset.rot * Math.PI/180);
              ctx.drawImage(img, -img.width*scale/2, -img.height*scale/2, img.width*scale, img.height*scale);
+             
+             ctx.restore(); // Undo rotation/scale
+
+             // C. The Shadow Lid (FIXED)
+             if (state.shadowImage) {
+                 ctx.save();
+                 ctx.clip(); // Clip to chamber shape again
+                 // Changed from 'multiply' to 'source-over' with opacity for better visibility
+                 ctx.globalCompositeOperation = 'source-over'; 
+                 ctx.globalAlpha = 0.85; 
+                 
+                 const shadowSize = Math.max(bounds.width, bounds.height) * 1.5; 
+                 ctx.drawImage(state.shadowImage, bounds.cx - shadowSize/2, bounds.cy - shadowSize/2, shadowSize, shadowSize);
+                 ctx.restore();
+             }
          }
+         
+         // D. The Stroke Outline
+         ctx.strokeStyle = (state.activeChamberId === c.id) ? '#8e44ad' : 'rgba(255,255,255,0.2)';
+         ctx.lineWidth = (state.activeChamberId === c.id) ? 3 : 1;
+         ctx.stroke();
+
          ctx.restore();
       });
       
       // 4. Intention Text
       if(state.intentionText) {
           ctx.font = '40px "Stylish", sans-serif'; 
-          ctx.fillStyle = '#aaa'; 
-          ctx.textAlign = 'center'; 
+          ctx.fillStyle = '#aaa'; ctx.textAlign = 'center'; 
           ctx.fillText(state.intentionText.toUpperCase(), canvas.width/2, canvas.height - 50);
       }
     }
 
     // --- ASSETS ---
-    function loadSingleAsset(key, src, isCustom=false) {
+    function loadSingleAsset(key, src, isCustom=false, isSigil=false) {
         const img = new Image();
         img.crossOrigin = "Anonymous"; 
         img.src = src;
         img.onload = () => {
             state.images[key] = img;
+            // Create UI Element
             const div = document.createElement('div');
-            div.className = 'asset-item' + (isCustom ? ' custom' : '');
+            div.className = 'asset-item' + (isCustom ? ' custom' : '') + (isSigil ? ' is-sigil' : '');
             div.dataset.id = key;
             div.onclick = () => selectAsset(key);
             div.innerHTML = `<img src="${src}">`;
-            document.getElementById('assetGrid').appendChild(div);
+            
+            // If custom (pasted/uploaded), put it at the start
+            const grid = document.getElementById('assetGrid');
+            if(isCustom) grid.insertBefore(div, grid.firstChild);
+            else grid.appendChild(div);
+            
+            if(isCustom) selectAsset(key);
         };
     }
 
     function initAssets() {
+        // Load Textures
         TEXTURE_FILENAMES.forEach(filename => {
             const img = new Image();
             img.crossOrigin = "Anonymous";
@@ -622,13 +643,22 @@
             };
         });
         
-        SIGIL_FILENAMES.forEach((filename, i) => {
-            loadSingleAsset('sigil_'+i, ASSETS_FOLDER + filename);
+        EMOJI_INVENTORY.forEach((emoji, i) => {
+             const dataURL = emojiToDataURL(emoji);
+             loadSingleAsset('emoji_'+i, dataURL, false, false);
         });
+
+        SIGIL_FILENAMES.forEach((filename, i) => {
+            loadSingleAsset('sigil_'+i, ASSETS_FOLDER + filename, false, true);
+        });
+        
+        const shd = new Image();
+        shd.src = ASSETS_FOLDER + SHADOW_FILENAME;
+        shd.onload = () => { state.shadowImage = shd; render(); };
 
         try {
             const saved = localStorage.getItem('talisman_custom_v3');
-            if(saved) JSON.parse(saved).forEach(item => loadSingleAsset(item.id, item.src, true));
+            if(saved) JSON.parse(saved).forEach(item => loadSingleAsset(item.id, item.src, true, false));
         } catch(e){}
     }
     
@@ -637,7 +667,11 @@
         state.selectedAssetKey = key;
         document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
         const active = document.querySelector(`.asset-item[data-id="${key}"]`);
-        if(active) active.classList.add('selected');
+        if(active) {
+            active.classList.add('selected');
+            // Auto scroll to make sure selected item is visible
+            active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
     }
 
     canvas.addEventListener('mousedown', handleInteract);
@@ -650,31 +684,31 @@
         const x = (clientX - rect.left) * (canvas.width / rect.width);
         const y = (clientY - rect.top) * (canvas.height / rect.height);
 
-        const hit = state.cavities.find(c => isInside(x, y, c.shape));
+        const hit = state.chambers.find(c => isInside(x, y, c.shape));
         if(hit) {
             if(state.selectedAssetKey) {
                 state.placedAssets[hit.id] = { key: state.selectedAssetKey, rot: 0, scale: 1.0 };
                 render();
             }
-            state.activeCavityId = hit.id;
+            state.activeChamberId = hit.id;
             const acc = document.getElementById('acc-calibration');
             acc.classList.remove('disabled');
             if(!acc.classList.contains('active')) toggleAccordion('acc-calibration');
             render();
         } else {
-            state.activeCavityId = null;
+            state.activeChamberId = null;
             render();
         }
     }
     
     document.getElementById('sigilRot').addEventListener('input', (e) => {
-        if(state.activeCavityId && state.placedAssets[state.activeCavityId]) {
-            state.placedAssets[state.activeCavityId].rot = parseInt(e.target.value); render();
+        if(state.activeChamberId && state.placedAssets[state.activeChamberId]) {
+            state.placedAssets[state.activeChamberId].rot = parseInt(e.target.value); render();
         }
     });
     document.getElementById('sigilScale').addEventListener('input', (e) => {
-        if(state.activeCavityId && state.placedAssets[state.activeCavityId]) {
-            state.placedAssets[state.activeCavityId].scale = parseFloat(e.target.value); render();
+        if(state.activeChamberId && state.placedAssets[state.activeChamberId]) {
+            state.placedAssets[state.activeChamberId].scale = parseFloat(e.target.value); render();
         }
     });
     document.getElementById('intentionInput').addEventListener('input', (e) => {
@@ -687,10 +721,33 @@
         const reader = new FileReader();
         reader.onload = function(evt) {
             const id = 'custom_' + Date.now();
-            loadSingleAsset(id, evt.target.result, true);
+            loadSingleAsset(id, evt.target.result, true, false);
         };
         reader.readAsDataURL(file);
     }
+    
+    // --- STICKER / PASTE HANDLER ---
+    window.addEventListener('paste', e => {
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file' && item.type.includes('image/')) {
+                const blob = item.getAsFile();
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    // Alert the user slightly so they know it worked
+                    const btn = document.querySelector('.btn-secondary');
+                    const originalText = btn.innerText;
+                    btn.innerText = "Sticker Detected...";
+                    setTimeout(() => btn.innerText = originalText, 1500);
+
+                    const id = 'sticker_' + Date.now();
+                    loadSingleAsset(id, event.target.result, true, false);
+                };
+                reader.readAsDataURL(blob);
+            }
+        }
+    });
 
     function exportImage() {
         const link = document.createElement('a');
